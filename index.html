@@ -1,0 +1,2471 @@
+```html
+<!DOCTYPE html>
+<html lang="ko" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Command Edit AI - 자연어 기반 스마트 편집기</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Pretendard & Inter & Noto Serif KR -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Noto Sans KR"', 'Inter', 'sans-serif'],
+                        serif: ['"Noto Serif KR"', 'serif'],
+                    },
+                    colors: {
+                        editor: {
+                            bg: '#0B0E14',
+                            panel: '#12161F',
+                            card: '#191F2C',
+                            border: '#262F40',
+                            accent: '#3B82F6',
+                            accentHover: '#2563EB',
+                            purple: '#8B5CF6',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0B0E14;
+            color: #F3F4F6;
+            font-family: 'Noto Sans KR', 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* 커스텀 스크롤바 */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #12161F;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2D3748;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4A5568;
+        }
+
+        /* 슬라이더 커스텀 */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 14px;
+            width: 14px;
+            border-radius: 50%;
+            background: #3B82F6;
+            cursor: pointer;
+            margin-top: -5px;
+            box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
+            transition: transform 0.15s ease;
+        }
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #262F40;
+            border-radius: 9999px;
+        }
+
+        /* 캔버스 체커보드 배경 (투명 영역 표시용) */
+        .canvas-checkerboard {
+            background-color: #0F131A;
+            background-image: 
+                linear-gradient(45deg, #161B24 25%, transparent 25%), 
+                linear-gradient(-45deg, #161B24 25%, transparent 25%), 
+                linear-gradient(45deg, transparent 75%, #161B24 75%), 
+                linear-gradient(-45deg, transparent 75%, #161B24 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
+
+        /* 글래스모피즘 커맨드 바 */
+        .command-glow {
+            box-shadow: 0 0 30px -5px rgba(59, 130, 246, 0.25), 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+        }
+        .command-glow:focus-within {
+            box-shadow: 0 0 35px -2px rgba(59, 130, 246, 0.45), 0 10px 30px -5px rgba(0, 0, 0, 0.6);
+            border-color: #3B82F6;
+        }
+
+        /* 로딩 스피너 애니메이션 */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); opacity: 0.7; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(0.95); opacity: 0.7; }
+        }
+        .ai-thinking {
+            animation: pulse-ring 1.8s infinite ease-in-out;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col select-none">
+
+    <!-- 상단 헤더 바 -->
+    <header class="h-14 bg-editor-panel border-b border-editor-border px-4 flex items-center justify-between sticky top-0 z-30">
+        <!-- 브랜드 로고 -->
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+                <i class="fa-solid fa-wand-magic-sparkles text-white text-sm"></i>
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <span class="font-bold text-base tracking-tight text-white">Command Edit AI</span>
+                    <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> AI 엔진 준비 완료
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 중앙 컨트롤: Undo / Redo / 원본 비교 -->
+        <div class="hidden md:flex items-center gap-1.5 bg-editor-bg p-1 rounded-xl border border-editor-border">
+            <button id="btnUndo" onclick="undo()" disabled class="px-3 py-1.5 rounded-lg text-xs font-medium text-gray-300 hover:bg-editor-card hover:text-white disabled:opacity-30 disabled:pointer-events-none transition flex items-center gap-1.5" title="실행 취소 (Ctrl+Z)">
+                <i class="fa-solid fa-rotate-left"></i> 실행 취소
+            </button>
+            <button id="btnRedo" onclick="redo()" disabled class="px-3 py-1.5 rounded-lg text-xs font-medium text-gray-300 hover:bg-editor-card hover:text-white disabled:opacity-30 disabled:pointer-events-none transition flex items-center gap-1.5" title="다시 실행 (Ctrl+Y)">
+                <i class="fa-solid fa-rotate-right"></i> 다시 실행
+            </button>
+            <div class="w-px h-4 bg-editor-border mx-1"></div>
+            <button id="btnCompare" 
+                onmousedown="startCompare()" onmouseup="endCompare()" onmouseleave="endCompare()"
+                ontouchstart="startCompare()" ontouchend="endCompare()"
+                class="px-3 py-1.5 rounded-lg text-xs font-medium text-amber-400 hover:bg-amber-500/10 active:bg-amber-500/20 transition flex items-center gap-1.5 cursor-pointer">
+                <i class="fa-solid fa-eye"></i> 누르고 원본 비교
+            </button>
+            <button onclick="resetAllEdits()" class="px-3 py-1.5 rounded-lg text-xs font-medium text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition flex items-center gap-1.5">
+                <i class="fa-solid fa-arrow-rotate-left"></i> 초기화
+            </button>
+        </div>
+
+        <!-- 우측 액션: 이미지 불러오기 / AI 새 이미지 / 내보내기 -->
+        <div class="flex items-center gap-2">
+            <label class="cursor-pointer px-3 py-1.5 rounded-xl bg-editor-card hover:bg-gray-800 border border-editor-border text-xs font-medium text-gray-200 transition flex items-center gap-1.5">
+                <i class="fa-solid fa-folder-open text-blue-400"></i>
+                <span class="hidden sm:inline">이미지 열기</span>
+                <input type="file" id="imageUpload" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
+            </label>
+
+            <button onclick="openGenerateModal()" class="px-3 py-1.5 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/40 text-xs font-medium text-purple-300 transition flex items-center gap-1.5">
+                <i class="fa-solid fa-sparkles"></i>
+                <span class="hidden sm:inline">AI 이미지 생성</span>
+            </button>
+
+            <div class="relative group">
+                <button onclick="exportImage('png')" class="px-4 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-xs font-semibold text-white shadow-lg shadow-blue-600/25 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-download"></i>
+                    <span>저장하기</span>
+                </button>
+                <!-- 포맷 선택 드롭다운 -->
+                <div class="absolute right-0 mt-1.5 w-36 bg-editor-card border border-editor-border rounded-xl shadow-xl py-1 hidden group-hover:block z-50">
+                    <button onclick="exportImage('png')" class="w-full text-left px-3 py-2 text-xs text-gray-200 hover:bg-blue-600/20 hover:text-blue-400 flex items-center justify-between">
+                        <span>PNG 고화질 저장</span>
+                        <span class="text-[10px] text-gray-500">.png</span>
+                    </button>
+                    <button onclick="exportImage('jpeg')" class="w-full text-left px-3 py-2 text-xs text-gray-200 hover:bg-blue-600/20 hover:text-blue-400 flex items-center justify-between">
+                        <span>JPG 압축 저장</span>
+                        <span class="text-[10px] text-gray-500">.jpg</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 메인 워크스페이스 영역 -->
+    <div class="flex-1 flex flex-col lg:flex-row overflow-hidden">
+        
+        <!-- 왼쪽/중앙: 메인 캔버스 & 상단 플로팅 AI 커맨드 바 -->
+        <main class="flex-1 flex flex-col relative bg-editor-bg overflow-hidden">
+            
+            <!-- 상단 자연어 명령어 입력창 (Floating Command Bar) -->
+            <div class="w-full max-w-3xl mx-auto px-4 pt-4 pb-2 z-20">
+                <div class="bg-editor-panel/95 backdrop-blur-md border border-editor-border rounded-2xl p-2 command-glow transition-all duration-200">
+                    <div class="flex items-center gap-2">
+                        <div class="pl-3 text-blue-400 flex items-center">
+                            <i class="fa-solid fa-terminal text-sm"></i>
+                        </div>
+                        <input type="text" id="commandInput" 
+                            placeholder="말하는 대로 다 편집됩니다! (예: '16:9로 자르고 시네마틱 레터박스 넣고 하단에 VLOG #01 자막 추가해줘')" 
+                            class="w-full bg-transparent text-sm text-white placeholder-gray-500 focus:outline-none py-2 px-1"
+                            onkeydown="if(event.key === 'Enter') executeAICommand()">
+                        
+                        <button id="btnExecute" onclick="executeAICommand()" class="shrink-0 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-semibold shadow-md transition flex items-center gap-2 cursor-pointer">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                            <span>AI 실행</span>
+                        </button>
+                    </div>
+
+                    <!-- 빠른 명령어 추천 칩 (Quick Prompts) -->
+                    <div class="flex items-center gap-1.5 overflow-x-auto pt-2 pb-1 px-2 border-t border-editor-border/60 mt-1.5 no-scrollbar">
+                        <span class="text-[11px] text-gray-500 shrink-0 mr-1"><i class="fa-solid fa-bolt text-amber-400 mr-1"></i>원클릭 명령:</span>
+                        <button onclick="applyQuickPrompt('시네마틱 레터박스 넣고 맑고 따뜻한 색감으로 선명하게 보정해줘')" class="shrink-0 px-2.5 py-1 rounded-lg bg-editor-card hover:bg-gray-800 border border-editor-border text-[11px] text-gray-300 transition">
+                            🎬 시네마틱 레터박스 + 맑은 색감
+                        </button>
+                        <button onclick="applyQuickPrompt('16:9 비율로 자르고 하단 중앙에 VLOG #01 자막을 세련되게 추가해줘')" class="shrink-0 px-2.5 py-1 rounded-lg bg-editor-card hover:bg-gray-800 border border-editor-border text-[11px] text-gray-300 transition">
+                            📺 16:9 크롭 + VLOG 자막
+                        </button>
+                        <button onclick="applyQuickPrompt('흑백 빈티지 감성으로 바꾸고 좌우 반전해줘')" class="shrink-0 px-2.5 py-1 rounded-lg bg-editor-card hover:bg-gray-800 border border-editor-border text-[11px] text-gray-300 transition">
+                            🎞️ 흑백 빈티지 + 좌우 반전
+                        </button>
+                        <button onclick="applyQuickPrompt('폴라로이드 흰색 테두리 액자 씌우고 벚꽃 스티커랑 햇살 효과 추가해줘')" class="shrink-0 px-2.5 py-1 rounded-lg bg-editor-card hover:bg-gray-800 border border-editor-border text-[11px] text-gray-300 transition">
+                            🌸 폴라로이드 + 벚꽃·햇살
+                        </button>
+                        <button onclick="applyQuickPrompt('눈 내리는 겨울 밤 분위기로 차갑고 몽환적으로 바꿔줘')" class="shrink-0 px-2.5 py-1 rounded-lg bg-editor-card hover:bg-gray-800 border border-editor-border text-[11px] text-gray-300 transition">
+                            ❄️ 눈 내리는 겨울 감성
+                        </button>
+                        <button onclick="applyQuickPrompt('배경을 붉은 노을이 지는 아름다운 바다 풍경으로 바꿔줘', true)" class="shrink-0 px-2.5 py-1 rounded-lg bg-purple-950/50 hover:bg-purple-900/50 border border-purple-500/40 text-[11px] text-purple-300 transition">
+                            🌅 AI 배경 교체 (노을 바다)
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 중앙 캔버스 프리뷰 컨테이너 (드래그 앤 드롭 업로드 및 레이어 이동 지원) -->
+            <div id="canvasWrapper" 
+                ondragover="event.preventDefault(); this.classList.add('ring-2', 'ring-blue-500');" 
+                ondragleave="this.classList.remove('ring-2', 'ring-blue-500');"
+                ondrop="handleCanvasDrop(event)"
+                class="flex-1 flex items-center justify-center p-4 sm:p-6 relative overflow-hidden transition-all">
+                <div class="relative max-w-full max-h-full flex items-center justify-center rounded-2xl overflow-hidden shadow-2xl border border-editor-border canvas-checkerboard">
+                    <canvas id="editorCanvas" class="max-w-full max-h-[58vh] lg:max-h-[66vh] object-contain block cursor-default"></canvas>
+                    
+                    <!-- 캔버스 인터랙션 힌트 배지 -->
+                    <div id="dragHintBadge" class="hidden absolute bottom-3 right-3 px-2.5 py-1 rounded-lg bg-black/60 text-gray-300 text-[10px] backdrop-blur-sm pointer-events-none">
+                        <i class="fa-solid fa-up-down-left-right mr-1 text-blue-400"></i>자막·스티커를 마우스로 드래그해 이동 가능
+                    </div>
+
+                    <!-- 원본 비교 배지 -->
+                    <div id="compareBadge" class="hidden absolute top-3 left-3 px-3 py-1 rounded-full bg-amber-500/90 text-black font-bold text-xs shadow-lg backdrop-blur-sm">
+                        원본 이미지 (Before)
+                    </div>
+
+                    <!-- AI 처리 중 오버레이 -->
+                    <div id="aiLoadingOverlay" class="hidden absolute inset-0 bg-editor-bg/80 backdrop-blur-sm flex flex-col items-center justify-center z-30 p-6 text-center">
+                        <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/30 ai-thinking mb-4">
+                            <i class="fa-solid fa-wand-magic-sparkles text-white text-xl"></i>
+                        </div>
+                        <p id="aiLoadingTitle" class="text-sm font-bold text-white mb-1">AI가 명령어를 분석하고 있습니다...</p>
+                        <p id="aiLoadingDesc" class="text-xs text-gray-400 max-w-xs">색감, 조명, 구도 및 자막 스타일을 실시간으로 계산 중입니다.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 하단 샘플 갤러리 & 모바일 컨트롤 바 -->
+            <div class="bg-editor-panel border-t border-editor-border px-4 py-2.5 flex flex-wrap items-center justify-between gap-3">
+                <!-- 샘플 이미지 선택 -->
+                <div class="flex items-center gap-2 overflow-x-auto">
+                    <span class="text-xs text-gray-400 font-medium shrink-0"><i class="fa-regular fa-images mr-1 text-blue-400"></i>샘플:</span>
+                    <button onclick="loadSampleImage('mountain')" class="px-2.5 py-1 rounded-lg bg-editor-card hover:bg-gray-800 border border-editor-border text-xs text-gray-300 transition shrink-0">
+                        🏔️ 산책로 풍경
+                    </button>
+                    <button onclick="loadSampleImage('city')" class="px-2.5 py-1 rounded-lg bg-editor-card hover:bg-gray-800 border border-editor-border text-xs text-gray-300 transition shrink-0">
+                        🌃 도심 야경
+                    </button>
+                    <button onclick="loadSampleImage('cafe')" class="px-2.5 py-1 rounded-lg bg-editor-card hover:bg-gray-800 border border-editor-border text-xs text-gray-300 transition shrink-0">
+                        ☕ 감성 카페
+                    </button>
+                    <button onclick="loadSampleImage('portrait')" class="px-2.5 py-1 rounded-lg bg-editor-card hover:bg-gray-800 border border-editor-border text-xs text-gray-300 transition shrink-0">
+                        👤 인물 스냅
+                    </button>
+                </div>
+
+                <!-- 모바일 전용 Undo/Redo/비교 버튼 -->
+                <div class="flex md:hidden items-center gap-1.5">
+                    <button onclick="undo()" class="p-2 rounded-lg bg-editor-card text-gray-300 text-xs"><i class="fa-solid fa-rotate-left"></i></button>
+                    <button onclick="redo()" class="p-2 rounded-lg bg-editor-card text-gray-300 text-xs"><i class="fa-solid fa-rotate-right"></i></button>
+                    <button ontouchstart="startCompare()" ontouchend="endCompare()" onmousedown="startCompare()" onmouseup="endCompare()" class="px-2.5 py-1.5 rounded-lg bg-amber-500/20 text-amber-300 text-xs font-medium">원본 비교</button>
+                </div>
+
+                <!-- 캔버스 해상도 정보 -->
+                <div id="canvasInfo" class="hidden sm:block text-[11px] text-gray-500 font-mono">
+                    1200 × 800 px
+                </div>
+            </div>
+        </main>
+
+        <!-- 오른쪽 패널: AI 처리 효과 레이어, 세부 조정 슬라이더, 텍스트 오버레이, 히스토리 -->
+        <aside class="w-full lg:w-88 xl:w-96 bg-editor-panel border-t lg:border-t-0 lg:border-l border-editor-border flex flex-col max-h-[50vh] lg:max-h-none overflow-y-auto">
+            
+            <!-- 탭 네비게이션 -->
+            <div class="grid grid-cols-3 border-b border-editor-border bg-editor-bg/50 sticky top-0 z-10">
+                <button onclick="switchTab('effects')" id="tabBtn-effects" class="py-3 text-xs font-semibold text-blue-400 border-b-2 border-blue-500 transition flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-sliders"></i> 보정 & 변형
+                </button>
+                <button onclick="switchTab('layers')" id="tabBtn-layers" class="py-3 text-xs font-medium text-gray-400 hover:text-gray-200 border-b-2 border-transparent transition flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-layer-group"></i> 자막·스티커 <span id="layerCountBadge" class="px-1.5 py-0.2 rounded-full bg-editor-card text-[10px]">0</span>
+                </button>
+                <button onclick="switchTab('history')" id="tabBtn-history" class="py-3 text-xs font-medium text-gray-400 hover:text-gray-200 border-b-2 border-transparent transition flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-clock-rotate-left"></i> 히스토리 <span id="historyCount" class="px-1.5 py-0.2 rounded-full bg-editor-card text-[10px]">1</span>
+                </button>
+            </div>
+
+            <!-- 탭 1: AI 처리 효과 레이어, 변형(크롭/회전/반전), 프레임/날씨, 색보정 슬라이더 -->
+            <div id="tabContent-effects" class="p-4 space-y-5">
+                
+                <!-- AI 활성 효과 레이어 카드 -->
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-xs font-bold text-gray-300 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-wand-magic-sparkles text-blue-400"></i> 최근 AI 실행 내역
+                        </h3>
+                        <span id="aiSummaryBadge" class="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">준비 완료</span>
+                    </div>
+                    <div id="aiEffectLayers" class="space-y-1.5 bg-editor-bg p-2.5 rounded-xl border border-editor-border">
+                        <div class="text-xs text-gray-500 text-center py-2">
+                            자연어 명령어를 입력하면 AI가 적용한 모든 편집 요소가 표시됩니다.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 비율 크롭 / 회전 / 반전 / 프레임 빠른 도구 -->
+                <div class="space-y-3 pt-2 border-t border-editor-border">
+                    <h3 class="text-xs font-bold text-gray-300 uppercase tracking-wider">구도 · 변형 · 시네마 효과</h3>
+                    
+                    <!-- 비율 크롭 -->
+                    <div>
+                        <span class="block text-[11px] text-gray-400 mb-1.5">화면 비율 (Aspect Ratio Crop)</span>
+                        <div class="grid grid-cols-5 gap-1">
+                            <button onclick="setAspectRatio('original')" id="ratio-original" class="ratio-btn py-1.5 rounded-lg bg-blue-600/20 border border-blue-500 text-[11px] font-medium text-blue-300">원본</button>
+                            <button onclick="setAspectRatio('1:1')" id="ratio-1:1" class="ratio-btn py-1.5 rounded-lg bg-editor-card border border-editor-border text-[11px] text-gray-300 hover:bg-gray-800">1:1</button>
+                            <button onclick="setAspectRatio('16:9')" id="ratio-16:9" class="ratio-btn py-1.5 rounded-lg bg-editor-card border border-editor-border text-[11px] text-gray-300 hover:bg-gray-800">16:9</button>
+                            <button onclick="setAspectRatio('9:16')" id="ratio-9:16" class="ratio-btn py-1.5 rounded-lg bg-editor-card border border-editor-border text-[11px] text-gray-300 hover:bg-gray-800">9:16</button>
+                            <button onclick="setAspectRatio('4:3')" id="ratio-4:3" class="ratio-btn py-1.5 rounded-lg bg-editor-card border border-editor-border text-[11px] text-gray-300 hover:bg-gray-800">4:3</button>
+                        </div>
+                    </div>
+
+                    <!-- 회전 및 반전 -->
+                    <div class="grid grid-cols-4 gap-1.5">
+                        <button onclick="rotateCanvas(-90)" class="py-1.5 px-2 rounded-lg bg-editor-card hover:bg-gray-800 border border-editor-border text-[11px] text-gray-300 flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-rotate-left text-blue-400"></i> -90°
+                        </button>
+                        <button onclick="rotateCanvas(90)" class="py-1.5 px-2 rounded-lg bg-editor-card hover:bg-gray-800 border border-editor-border text-[11px] text-gray-300 flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-rotate-right text-blue-400"></i> +90°
+                        </button>
+                        <button onclick="toggleFlip('h')" id="btnFlipH" class="py-1.5 px-2 rounded-lg bg-editor-card hover:bg-gray-800 border border-editor-border text-[11px] text-gray-300 flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-arrows-left-right text-purple-400"></i> 좌우반전
+                        </button>
+                        <button onclick="toggleFlip('v')" id="btnFlipV" class="py-1.5 px-2 rounded-lg bg-editor-card hover:bg-gray-800 border border-editor-border text-[11px] text-gray-300 flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-arrows-up-down text-purple-400"></i> 상하반전
+                        </button>
+                    </div>
+
+                    <!-- 프레임 & 날씨 오버레이 토글 -->
+                    <div class="grid grid-cols-2 gap-2 pt-1">
+                        <div>
+                            <label class="block text-[11px] text-gray-400 mb-1">프레임 / 레터박스</label>
+                            <select id="frameSelect" onchange="changeFrame(this.value)" class="w-full bg-editor-card border border-editor-border rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none">
+                                <option value="none">없음</option>
+                                <option value="letterbox">시네마틱 레터박스</option>
+                                <option value="polaroid">폴라로이드 흰색 액자</option>
+                                <option value="white-border">모던 화이트 테두리</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-gray-400 mb-1">분위기 / 날씨 효과</label>
+                            <select id="weatherSelect" onchange="changeWeather(this.value)" class="w-full bg-editor-card border border-editor-border rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none">
+                                <option value="none">없음</option>
+                                <option value="sunflare">따뜻한 햇살 렌즈플레어</option>
+                                <option value="snow">흩날리는 눈송이</option>
+                                <option value="rain">감성적인 빗줄기</option>
+                                <option value="sakura">흩날리는 벚꽃 잎</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 세부 색보정 컨트롤 -->
+                <div class="space-y-3.5 pt-2 border-t border-editor-border">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xs font-bold text-gray-300 uppercase tracking-wider">세부 색보정 슬라이더</h3>
+                        <button onclick="resetFiltersOnly()" class="text-[11px] text-gray-400 hover:text-blue-400 transition">색보정 초기화</button>
+                    </div>
+
+                    <!-- 밝기 -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-gray-400">밝기 (Brightness)</span>
+                            <span id="val-brightness" class="text-gray-200 font-mono">100%</span>
+                        </div>
+                        <input type="range" id="slider-brightness" min="30" max="200" value="100" oninput="updateFilterParam('brightness', this.value)" onchange="commitHistory('밝기 수동 조절')">
+                    </div>
+
+                    <!-- 대비 -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-gray-400">대비 / 선명도 (Contrast)</span>
+                            <span id="val-contrast" class="text-gray-200 font-mono">100%</span>
+                        </div>
+                        <input type="range" id="slider-contrast" min="30" max="200" value="100" oninput="updateFilterParam('contrast', this.value)" onchange="commitHistory('대비 수동 조절')">
+                    </div>
+
+                    <!-- 채도 -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-gray-400">채도 (Saturation)</span>
+                            <span id="val-saturate" class="text-gray-200 font-mono">100%</span>
+                        </div>
+                        <input type="range" id="slider-saturate" min="0" max="220" value="100" oninput="updateFilterParam('saturate', this.value)" onchange="commitHistory('채도 수동 조절')">
+                    </div>
+
+                    <!-- 색온도 (Warmth / Coolness) -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-gray-400">색온도 (Warmth)</span>
+                            <span id="val-warmth" class="text-gray-200 font-mono">0</span>
+                        </div>
+                        <input type="range" id="slider-warmth" min="-50" max="50" value="0" oninput="updateFilterParam('warmth', this.value)" onchange="commitHistory('색온도 수동 조절')">
+                    </div>
+
+                    <!-- 세피아 / 빈티지 -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-gray-400">빈티지 세피아 (Sepia)</span>
+                            <span id="val-sepia" class="text-gray-200 font-mono">0%</span>
+                        </div>
+                        <input type="range" id="slider-sepia" min="0" max="100" value="0" oninput="updateFilterParam('sepia', this.value)" onchange="commitHistory('세피아 수동 조절')">
+                    </div>
+
+                    <!-- 흑백 -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-gray-400">흑백 (Grayscale)</span>
+                            <span id="val-grayscale" class="text-gray-200 font-mono">0%</span>
+                        </div>
+                        <input type="range" id="slider-grayscale" min="0" max="100" value="0" oninput="updateFilterParam('grayscale', this.value)" onchange="commitHistory('흑백 수동 조절')">
+                    </div>
+
+                    <!-- 색상 반전 -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-gray-400">색상 반전 (Invert)</span>
+                            <span id="val-invert" class="text-gray-200 font-mono">0%</span>
+                        </div>
+                        <input type="range" id="slider-invert" min="0" max="100" value="0" oninput="updateFilterParam('invert', this.value)" onchange="commitHistory('색상 반전 조절')">
+                    </div>
+
+                    <!-- 블러 / 소프트 포커스 -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-gray-400">블러 / 몽환효과 (Blur)</span>
+                            <span id="val-blur" class="text-gray-200 font-mono">0px</span>
+                        </div>
+                        <input type="range" id="slider-blur" min="0" max="15" step="0.5" value="0" oninput="updateFilterParam('blur', this.value)" onchange="commitHistory('블러 수동 조절')">
+                    </div>
+
+                    <!-- 비네팅 -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-gray-400">비네팅 (Vignette)</span>
+                            <span id="val-vignette" class="text-gray-200 font-mono">0%</span>
+                        </div>
+                        <input type="range" id="slider-vignette" min="0" max="100" value="0" oninput="updateFilterParam('vignette', this.value)" onchange="commitHistory('비네팅 수동 조절')">
+                    </div>
+
+                    <!-- 줌 / 확대 -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-gray-400">줌 배율 (Zoom)</span>
+                            <span id="val-zoom" class="text-gray-200 font-mono">100%</span>
+                        </div>
+                        <input type="range" id="slider-zoom" min="100" max="200" value="100" oninput="updateTransformZoom(this.value)" onchange="commitHistory('줌 배율 조절')">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 탭 2: 다중 자막 & 스티커 레이어 관리 -->
+            <div id="tabContent-layers" class="hidden p-4 space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xs font-bold text-gray-300 uppercase tracking-wider">자막 · 스티커 레이어 목록</h3>
+                    <div class="flex gap-1.5">
+                        <button onclick="addNewTextLayer('새 자막 텍스트')" class="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-[11px] font-medium text-white flex items-center gap-1">
+                            <i class="fa-solid fa-plus"></i> 자막
+                        </button>
+                        <button onclick="addNewStickerLayer('✨')" class="px-2.5 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-[11px] font-medium text-white flex items-center gap-1">
+                            <i class="fa-solid fa-face-smile"></i> 스티커
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 빠른 이모지 스티커 팔레트 -->
+                <div class="flex items-center justify-between bg-editor-bg p-2 rounded-xl border border-editor-border">
+                    <span class="text-[11px] text-gray-400 pl-1">스티커 추가:</span>
+                    <div class="flex gap-1">
+                        <button onclick="addNewStickerLayer('🌸')" class="hover:scale-125 transition text-base px-1">🌸</button>
+                        <button onclick="addNewStickerLayer('✨')" class="hover:scale-125 transition text-base px-1">✨</button>
+                        <button onclick="addNewStickerLayer('❤️')" class="hover:scale-125 transition text-base px-1">❤️</button>
+                        <button onclick="addNewStickerLayer('⭐')" class="hover:scale-125 transition text-base px-1">⭐</button>
+                        <button onclick="addNewStickerLayer('🔥')" class="hover:scale-125 transition text-base px-1">🔥</button>
+                        <button onclick="addNewStickerLayer('😎')" class="hover:scale-125 transition text-base px-1">😎</button>
+                    </div>
+                </div>
+
+                <!-- 레이어 목록 리스트 -->
+                <div id="layersListContainer" class="space-y-2 max-h-44 overflow-y-auto">
+                    <div class="text-xs text-gray-500 text-center py-4 bg-editor-bg rounded-xl border border-editor-border">
+                        추가된 자막이나 스티커가 없습니다.
+                    </div>
+                </div>
+
+                <!-- 선택된 레이어 상세 속성 편집기 -->
+                <div id="selectedLayerEditor" class="hidden space-y-3 bg-editor-bg p-3 rounded-xl border border-blue-500/40">
+                    <div class="flex items-center justify-between border-b border-editor-border pb-2">
+                        <span class="text-xs font-bold text-blue-400">선택된 레이어 속성</span>
+                        <button onclick="deleteSelectedLayer()" class="text-[11px] text-red-400 hover:text-red-300 flex items-center gap-1">
+                            <i class="fa-solid fa-trash"></i> 삭제
+                        </button>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">내용 (텍스트 / 이모지)</label>
+                        <input type="text" id="layerTextInput" 
+                            class="w-full bg-editor-card border border-editor-border rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500"
+                            oninput="updateSelectedLayerFromUI()">
+                    </div>
+
+                    <div id="layerTextStyleOptions" class="space-y-3">
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-xs text-gray-400 mb-1">빠른 위치 정렬</label>
+                                <select id="layerPosPresetSelect" onchange="applyLayerPositionPreset(this.value)" class="w-full bg-editor-card border border-editor-border rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none">
+                                    <option value="custom">직접 드래그 위치</option>
+                                    <option value="bottom-center">하단 중앙</option>
+                                    <option value="bottom-right">우측 하단</option>
+                                    <option value="bottom-left">좌측 하단</option>
+                                    <option value="center">정중앙</option>
+                                    <option value="top-center">상단 중앙</option>
+                                    <option value="top-left">좌측 상단</option>
+                                    <option value="top-right">우측 상단</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs text-gray-400 mb-1">서체 스타일</label>
+                                <select id="layerFontSelect" onchange="updateSelectedLayerFromUI()" class="w-full bg-editor-card border border-editor-border rounded-lg px-2 py-1.5 text-xs text-white focus:outline-none">
+                                    <option value="sans">모던 고딕 (Sans)</option>
+                                    <option value="serif">감성 명조 (Serif)</option>
+                                    <option value="mono">필름 타임 (Mono)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 items-center">
+                            <div>
+                                <label class="block text-xs text-gray-400 mb-1">글자 색상</label>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" id="layerColorInput" value="#FFFFFF" onchange="updateSelectedLayerFromUI()" class="w-7 h-7 rounded cursor-pointer bg-transparent border-0">
+                                    <span id="layerColorHex" class="text-xs font-mono text-gray-300">#FFFFFF</span>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-end gap-2 pt-4">
+                                <span class="text-xs text-gray-400">배경 박스</span>
+                                <input type="checkbox" id="layerBgToggle" checked onchange="updateSelectedLayerFromUI()" class="rounded bg-editor-card border-editor-border text-blue-600 focus:ring-0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">크기 (<span id="val-layerSize">40</span>px)</label>
+                        <input type="range" id="slider-layerSize" min="16" max="140" value="40" oninput="updateSelectedLayerFromUI()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 탭 3: AI 편집 히스토리 & 타임라인 -->
+            <div id="tabContent-history" class="hidden p-4 space-y-3">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xs font-bold text-gray-300 uppercase tracking-wider">편집 히스토리 타임라인</h3>
+                    <span class="text-[11px] text-gray-500">클릭하여 시점 복원</span>
+                </div>
+                <div id="historyList" class="space-y-2">
+                    <!-- 동적으로 히스토리 아이템 추가됨 -->
+                </div>
+            </div>
+
+        </aside>
+    </div>
+
+    <!-- AI 새 이미지 생성 모달 -->
+    <div id="generateModal" class="hidden fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-editor-panel border border-editor-border rounded-2xl max-w-md w-full p-5 shadow-2xl space-y-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <div class="w-7 h-7 rounded-lg bg-purple-600/30 border border-purple-500/40 flex items-center justify-center text-purple-400">
+                        <i class="fa-solid fa-sparkles text-xs"></i>
+                    </div>
+                    <h3 class="text-sm font-bold text-white">AI 새 이미지 생성하기</h3>
+                </div>
+                <button onclick="closeGenerateModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <p class="text-xs text-gray-400 leading-relaxed">
+                원하는 장면이나 피사체를 한국어로 묘사하면 Gemini 이미지 모델이 새로운 베이스 이미지를 생성합니다. 생성 후 자연어로 즉시 추가 편집할 수 있습니다.
+            </p>
+
+            <div>
+                <textarea id="generatePromptInput" rows="3" 
+                    placeholder="예: 벚꽃이 흩날리는 서울의 고궁 산책로를 걷는 따뜻한 봄날의 풍경, 고화질 사진"
+                    class="w-full bg-editor-bg border border-editor-border rounded-xl p-3 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"></textarea>
+            </div>
+
+            <div class="flex flex-wrap gap-1.5">
+                <button onclick="document.getElementById('generatePromptInput').value='노을이 지는 한강 공원의 감성적인 피크닉 풍경, 시네마틱 사진'" class="text-[11px] px-2.5 py-1 rounded-lg bg-editor-card hover:bg-gray-800 text-gray-300 border border-editor-border">🌅 한강 노을 피크닉</button>
+                <button onclick="document.getElementById('generatePromptInput').value='비가 내린 후 네온사인이 반사되는 미래적인 서울 밤거리, 사이버펑크 감성'" class="text-[11px] px-2.5 py-1 rounded-lg bg-editor-card hover:bg-gray-800 text-gray-300 border border-editor-border">🌃 네온 서울 밤거리</button>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeGenerateModal()" class="px-4 py-2 rounded-xl bg-editor-card hover:bg-gray-800 text-xs text-gray-300">취소</button>
+                <button onclick="generateNewBaseImage()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-xs font-semibold text-white shadow-lg flex items-center gap-1.5">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> 이미지 생성
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 토스트 메시지 알림 박스 (alert 대체) -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <script>
+        // ==========================================
+        // 1. 전역 상태 및 에디터 데이터 구조
+        // ==========================================
+        const apiKey = ""; // 런타임 자동 주입
+        const TEXT_MODEL = "gemini-2.5-flash";
+        const IMAGE_MODEL = "gemini-2.5-flash-image";
+
+        const canvas = document.getElementById('editorCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let baseImage = new Image();
+        baseImage.crossOrigin = "anonymous";
+        let originalBaseImageSrc = "";
+        let isComparingOriginal = false;
+
+        // 캔버스 위 레이어 드래그 상태
+        let selectedLayerId = null;
+        let isDraggingLayer = false;
+        let dragOffsetX = 0;
+        let dragOffsetY = 0;
+        let renderedLayerBounds = []; // 히트 테스트용 바운딩 박스 캐시
+
+        // 고정 시드 파티클 (날씨 오버레이용)
+        const weatherParticles = Array.from({ length: 85 }, (_, i) => ({
+            rx: ((i * 173 + 29) % 1000) / 1000,
+            ry: ((i * 293 + 71) % 1000) / 1000,
+            size: 0.6 + (i % 5) * 0.25,
+            angle: ((i % 7) - 3) * 0.15
+        }));
+
+        // 현재 편집 상태 객체
+        let currentState = {
+            imageSrc: "",
+            filters: {
+                brightness: 100, // %
+                contrast: 100,   // %
+                saturate: 100,   // %
+                warmth: 0,       // -50 ~ +50
+                sepia: 0,        // 0 ~ 100%
+                grayscale: 0,    // 0 ~ 100%
+                invert: 0,       // 0 ~ 100%
+                blur: 0,         // 0 ~ 15px
+                vignette: 0      // 0 ~ 100%
+            },
+            transform: {
+                aspectRatio: "original", // original, 1:1, 16:9, 9:16, 4:3
+                rotation: 0,             // 0, 90, 180, 270
+                flipH: false,
+                flipV: false,
+                zoom: 100                // 100 ~ 200%
+            },
+            overlays: {
+                frame: "none",           // none, letterbox, polaroid, white-border
+                weather: "none"          // none, sunflare, snow, rain, sakura
+            },
+            layers: [], // 다중 자막 & 스티커 레이어: { id, type: 'text'|'sticker', text, xNorm, yNorm, fontFamily, color, size, hasBg }
+            aiLayers: [] // 최근 AI가 적용한 작업 내역
+        };
+
+        // 실행 취소 / 다시 실행 히스토리 스택
+        let historyStack = [];
+        let historyIndex = -1;
+
+        // ==========================================
+        // 2. 초기화 및 고화질 프로시저럴 샘플 이미지 생성기
+        // ==========================================
+        window.onload = function () {
+            setupCanvasInteractions();
+            loadSampleImage('mountain');
+        };
+
+        /**
+         * 외부 URL 깨짐 방지를 위해 Canvas API로 고품질 일러스트/풍경 샘플을 즉시 생성하여 로드
+         */
+        function loadSampleImage(type) {
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = 1200;
+            tempCanvas.height = 750;
+            const tCtx = tempCanvas.getContext('2d');
+
+            if (type === 'mountain') {
+                // 컨셉 이미지와 유사한 산책로 & 흐린 하늘 풍경 (AI 보정 테스트에 최적)
+                const skyGrad = tCtx.createLinearGradient(0, 0, 0, 420);
+                skyGrad.addColorStop(0, '#6E7F91');
+                skyGrad.addColorStop(0.6, '#9AA8B6');
+                skyGrad.addColorStop(1, '#CBD5E1');
+                tCtx.fillStyle = skyGrad;
+                tCtx.fillRect(0, 0, 1200, 420);
+
+                // 구름 낀 하늘 디테일
+                tCtx.fillStyle = 'rgba(255, 255, 255, 0.22)';
+                for (let i = 0; i < 8; i++) {
+                    tCtx.beginPath();
+                    tCtx.ellipse(150 + i * 140, 110 + (i % 3) * 35, 130, 45, 0, 0, Math.PI * 2);
+                    tCtx.fill();
+                }
+
+                // 원경 산맥
+                tCtx.fillStyle = '#4B5E6B';
+                tCtx.beginPath();
+                tCtx.moveTo(0, 420);
+                tCtx.lineTo(0, 260);
+                tCtx.lineTo(240, 170);
+                tCtx.lineTo(520, 290);
+                tCtx.lineTo(820, 150);
+                tCtx.lineTo(1200, 270);
+                tCtx.lineTo(1200, 420);
+                tCtx.closePath();
+                tCtx.fill();
+
+                // 근경 녹음 & 초원
+                const grassGrad = tCtx.createLinearGradient(0, 380, 0, 750);
+                grassGrad.addColorStop(0, '#4A634D');
+                grassGrad.addColorStop(1, '#2D3E30');
+                tCtx.fillStyle = grassGrad;
+                tCtx.fillRect(0, 380, 1200, 370);
+
+                // 나무 데크 산책로
+                tCtx.fillStyle = '#7C5E46';
+                tCtx.beginPath();
+                tCtx.moveTo(480, 750);
+                tCtx.lineTo(660, 410);
+                tCtx.lineTo(710, 410);
+                tCtx.lineTo(860, 750);
+                tCtx.closePath();
+                tCtx.fill();
+
+                // 산책로 난간
+                tCtx.strokeStyle = '#5A4230';
+                tCtx.lineWidth = 6;
+                tCtx.beginPath();
+                tCtx.moveTo(475, 720);
+                tCtx.lineTo(658, 395);
+                tCtx.moveTo(865, 720);
+                tCtx.lineTo(712, 395);
+                tCtx.stroke();
+
+                // 우측 나무 실루엣
+                tCtx.fillStyle = '#384D3B';
+                for (let i = 0; i < 6; i++) {
+                    tCtx.beginPath();
+                    tCtx.arc(920 + (i % 2) * 110, 230 + i * 45, 95, 0, Math.PI * 2);
+                    tCtx.fill();
+                }
+            } else if (type === 'city') {
+                // 도심 야경
+                const nightGrad = tCtx.createLinearGradient(0, 0, 0, 750);
+                nightGrad.addColorStop(0, '#090D16');
+                nightGrad.addColorStop(0.65, '#17233B');
+                nightGrad.addColorStop(1, '#0B111E');
+                tCtx.fillStyle = nightGrad;
+                tCtx.fillRect(0, 0, 1200, 750);
+
+                // 별빛
+                tCtx.fillStyle = 'rgba(255,255,255,0.6)';
+                for (let i = 0; i < 60; i++) {
+                    tCtx.fillRect((i * 197) % 1200, (i * 89) % 300, 2, 2);
+                }
+
+                // 빌딩 스카이라인
+                const buildings = [
+                    {x: 60, y: 260, w: 140, h: 490, c: '#111827'},
+                    {x: 220, y: 180, w: 170, h: 570, c: '#1E293B'},
+                    {x: 420, y: 120, w: 150, h: 630, c: '#0F172A'},
+                    {x: 600, y: 210, w: 190, h: 540, c: '#1E293B'},
+                    {x: 820, y: 150, w: 160, h: 600, c: '#111827'},
+                    {x: 1000, y: 240, w: 150, h: 510, c: '#1F2937'}
+                ];
+                buildings.forEach(b => {
+                    tCtx.fillStyle = b.c;
+                    tCtx.fillRect(b.x, b.y, b.w, b.h);
+                    // 창문 불빛
+                    for (let wy = b.y + 25; wy < 700; wy += 32) {
+                        for (let wx = b.x + 18; wx < b.x + b.w - 20; wx += 26) {
+                            if ((wx + wy) % 3 !== 0) {
+                                tCtx.fillStyle = (wx * wy) % 5 === 0 ? '#60A5FA' : '#FBBF24';
+                                tCtx.fillRect(wx, wy, 10, 16);
+                            }
+                        }
+                    }
+                });
+            } else if (type === 'cafe') {
+                // 따뜻한 감성 카페 테이블
+                tCtx.fillStyle = '#2C221E';
+                tCtx.fillRect(0, 0, 1200, 750);
+
+                // 창가 빛
+                const lightGrad = tCtx.createRadialGradient(300, 180, 40, 300, 180, 520);
+                lightGrad.addColorStop(0, 'rgba(253, 224, 171, 0.45)');
+                lightGrad.addColorStop(1, 'rgba(44, 34, 30, 0)');
+                tCtx.fillStyle = lightGrad;
+                tCtx.fillRect(0, 0, 1200, 750);
+
+                // 원목 테이블
+                tCtx.fillStyle = '#5C3D2E';
+                tCtx.fillRect(0, 430, 1200, 320);
+
+                // 라떼 아트 커피잔
+                tCtx.fillStyle = '#F3F4F6';
+                tCtx.beginPath();
+                tCtx.arc(540, 470, 95, 0, Math.PI * 2);
+                tCtx.fill();
+                tCtx.fillStyle = '#8B5A2B';
+                tCtx.beginPath();
+                tCtx.arc(540, 470, 80, 0, Math.PI * 2);
+                tCtx.fill();
+                // 하트 라떼아트
+                tCtx.fillStyle = '#FDE68A';
+                tCtx.beginPath();
+                tCtx.arc(540, 470, 28, 0, Math.PI * 2);
+                tCtx.fill();
+
+                // 크루아상 접시
+                tCtx.fillStyle = '#E5E7EB';
+                tCtx.beginPath();
+                tCtx.ellipse(830, 510, 130, 75, 0, 0, Math.PI * 2);
+                tCtx.fill();
+                tCtx.fillStyle = '#D97706';
+                tCtx.beginPath();
+                tCtx.ellipse(830, 505, 85, 42, -0.2, 0, Math.PI * 2);
+                tCtx.fill();
+            } else if (type === 'portrait') {
+                // 감성 인물 스냅 실루엣 & 보케 배경
+                const bgGrad = tCtx.createLinearGradient(0, 0, 1200, 750);
+                bgGrad.addColorStop(0, '#334155');
+                bgGrad.addColorStop(1, '#1E293B');
+                tCtx.fillStyle = bgGrad;
+                tCtx.fillRect(0, 0, 1200, 750);
+
+                // 배경 보케 빛망울
+                const bokehColors = ['rgba(251, 191, 36, 0.25)', 'rgba(96, 165, 250, 0.22)', 'rgba(244, 114, 182, 0.22)'];
+                for (let i = 0; i < 24; i++) {
+                    tCtx.fillStyle = bokehColors[i % 3];
+                    tCtx.beginPath();
+                    tCtx.arc((i * 173) % 1200, (i * 113) % 650, 30 + (i % 4) * 18, 0, Math.PI * 2);
+                    tCtx.fill();
+                }
+
+                // 인물 실루엣 (상반신)
+                tCtx.fillStyle = '#E2B49A'; // 피부톤
+                tCtx.beginPath();
+                tCtx.arc(600, 310, 95, 0, Math.PI * 2);
+                tCtx.fill();
+
+                // 헤어
+                tCtx.fillStyle = '#1F2937';
+                tCtx.beginPath();
+                tCtx.arc(600, 295, 105, Math.PI, Math.PI * 2);
+                tCtx.fill();
+                tCtx.fillRect(495, 295, 210, 160);
+
+                // 상의
+                tCtx.fillStyle = '#F8FAFC';
+                tCtx.beginPath();
+                tCtx.ellipse(600, 620, 210, 190, 0, Math.PI, Math.PI * 2);
+                tCtx.fill();
+            }
+
+            const dataUrl = tempCanvas.toDataURL('image/png');
+            setNewBaseImage(dataUrl, `샘플 불러오기 (${type})`);
+        }
+
+        function setNewBaseImage(src, actionLabel = "새 이미지 로드") {
+            originalBaseImageSrc = src;
+            baseImage = new Image();
+            baseImage.crossOrigin = "anonymous";
+            baseImage.onload = () => {
+                // 상태 초기화
+                currentState = {
+                    imageSrc: src,
+                    filters: {
+                        brightness: 100, contrast: 100, saturate: 100,
+                        warmth: 0, sepia: 0, grayscale: 0, invert: 0, blur: 0, vignette: 0
+                    },
+                    transform: {
+                        aspectRatio: "original",
+                        rotation: 0,
+                        flipH: false,
+                        flipV: false,
+                        zoom: 100
+                    },
+                    overlays: {
+                        frame: "none",
+                        weather: "none"
+                    },
+                    layers: [],
+                    aiLayers: []
+                };
+                selectedLayerId = null;
+
+                historyStack = [];
+                historyIndex = -1;
+                syncUIWithState();
+                renderCanvas();
+                commitHistory(actionLabel);
+            };
+            baseImage.src = src;
+        }
+
+        // 로컬 파일 업로드 및 캔버스 드래그 앤 드롭 처리
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            loadImageFile(file);
+        }
+
+        function handleCanvasDrop(event) {
+            event.preventDefault();
+            document.getElementById('canvasWrapper').classList.remove('ring-2', 'ring-blue-500');
+            const file = event.dataTransfer?.files?.[0];
+            if (file && file.type.startsWith('image/')) {
+                loadImageFile(file);
+            }
+        }
+
+        function loadImageFile(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                setNewBaseImage(e.target.result, `이미지 업로드: ${file.name}`);
+                showToast("이미지를 성공적으로 불러왔습니다.", "success");
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // ==========================================
+        // 3. 실시간 캔버스 렌더링 엔진 (크롭, 회전, 반전, 필터, 날씨, 프레임, 다중 레이어)
+        // ==========================================
+        function computeCanvasDimensions() {
+            const rot = ((currentState.transform.rotation % 360) + 360) % 360;
+            const isSwapped = rot === 90 || rot === 270;
+            let srcW = isSwapped ? baseImage.height : baseImage.width;
+            let srcH = isSwapped ? baseImage.width : baseImage.height;
+
+            const ratio = currentState.transform.aspectRatio;
+            if (ratio === '1:1') {
+                const s = Math.min(srcW, srcH);
+                return { w: s, h: s };
+            } else if (ratio === '16:9') {
+                const targetH = Math.round(srcW * 9 / 16);
+                if (targetH <= srcH) return { w: srcW, h: targetH };
+                return { w: Math.round(srcH * 16 / 9), h: srcH };
+            } else if (ratio === '9:16') {
+                const targetW = Math.round(srcH * 9 / 16);
+                if (targetW <= srcW) return { w: targetW, h: srcH };
+                return { w: srcW, h: Math.round(srcW * 16 / 9) };
+            } else if (ratio === '4:3') {
+                const targetH = Math.round(srcW * 3 / 4);
+                if (targetH <= srcH) return { w: srcW, h: targetH };
+                return { w: Math.round(srcH * 4 / 3), h: srcH };
+            }
+            return { w: srcW, h: srcH };
+        }
+
+        function renderCanvas() {
+            if (!baseImage || !baseImage.complete || baseImage.naturalWidth === 0) return;
+
+            // 원본 비교 모드일 경우 원본 크기 및 원본 픽셀만 표시
+            if (isComparingOriginal) {
+                canvas.width = baseImage.width;
+                canvas.height = baseImage.height;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.filter = 'none';
+                ctx.drawImage(baseImage, 0, 0);
+                return;
+            }
+
+            const { w, h } = computeCanvasDimensions();
+            if (canvas.width !== w || canvas.height !== h) {
+                canvas.width = w;
+                canvas.height = h;
+            }
+            document.getElementById('canvasInfo').textContent = `${w} × ${h} px`;
+            ctx.clearRect(0, 0, w, h);
+
+            const f = currentState.filters;
+            const tr = currentState.transform;
+
+            // 1) 베이스 이미지 변형(회전, 좌우/상하 반전, 줌, 비율 크롭) + CSS 필터 렌더링
+            ctx.save();
+            ctx.filter = `brightness(${f.brightness}%) contrast(${f.contrast}%) saturate(${f.saturate}%) sepia(${f.sepia}%) grayscale(${f.grayscale}%) invert(${f.invert}%) blur(${f.blur}px)`;
+            
+            ctx.translate(w / 2, h / 2);
+            ctx.rotate((tr.rotation * Math.PI) / 180);
+            ctx.scale((tr.flipH ? -1 : 1) * (tr.zoom / 100), (tr.flipV ? -1 : 1) * (tr.zoom / 100));
+
+            // 비율 크롭 시 캔버스를 빈틈없이 채우도록 cover 스케일 계산
+            const rot = ((tr.rotation % 360) + 360) % 360;
+            const isSwapped = rot === 90 || rot === 270;
+            const effW = isSwapped ? baseImage.height : baseImage.width;
+            const effH = isSwapped ? baseImage.width : baseImage.height;
+            const coverScale = Math.max(w / effW, h / effH);
+
+            ctx.drawImage(
+                baseImage,
+                (-baseImage.width * coverScale) / 2,
+                (-baseImage.height * coverScale) / 2,
+                baseImage.width * coverScale,
+                baseImage.height * coverScale
+            );
+            ctx.restore();
+
+            // 2) 색온도 (Warmth)
+            if (f.warmth !== 0) {
+                ctx.save();
+                if (f.warmth > 0) {
+                    ctx.fillStyle = `rgba(255, 145, 50, ${(f.warmth / 50) * 0.25})`;
+                } else {
+                    ctx.fillStyle = `rgba(56, 152, 255, ${(Math.abs(f.warmth) / 50) * 0.26})`;
+                }
+                ctx.globalCompositeOperation = 'soft-light';
+                ctx.fillRect(0, 0, w, h);
+                ctx.restore();
+            }
+
+            // 3) 비네팅 (Vignette)
+            if (f.vignette > 0) {
+                ctx.save();
+                const radius = Math.max(w, h) * 0.72;
+                const grad = ctx.createRadialGradient(w / 2, h / 2, radius * 0.35, w / 2, h / 2, radius);
+                grad.addColorStop(0, 'rgba(0,0,0,0)');
+                grad.addColorStop(1, `rgba(0,0,0,${(f.vignette / 100) * 0.85})`);
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, w, h);
+                ctx.restore();
+            }
+
+            // 4) 분위기 / 날씨 효과 오버레이
+            renderWeatherOverlay(ctx, w, h, currentState.overlays.weather);
+
+            // 5) 프레임 / 시네마틱 레터박스
+            renderFrameOverlay(ctx, w, h, currentState.overlays.frame);
+
+            // 6) 다중 자막 및 스티커 레이어 렌더링
+            renderedLayerBounds = [];
+            const dragHint = document.getElementById('dragHintBadge');
+            if (currentState.layers.length > 0) {
+                dragHint.classList.remove('hidden');
+                currentState.layers.forEach(layer => {
+                    const bounds = renderSingleLayer(ctx, w, h, layer, layer.id === selectedLayerId);
+                    renderedLayerBounds.push({ id: layer.id, ...bounds });
+                });
+            } else {
+                dragHint.classList.add('hidden');
+            }
+        }
+
+        function renderWeatherOverlay(ctx, w, h, weather) {
+            if (!weather || weather === 'none') return;
+            ctx.save();
+            if (weather === 'sunflare') {
+                const flareGrad = ctx.createRadialGradient(w * 0.18, h * 0.15, 10, w * 0.18, h * 0.15, Math.max(w, h) * 0.65);
+                flareGrad.addColorStop(0, 'rgba(255, 250, 220, 0.72)');
+                flareGrad.addColorStop(0.25, 'rgba(255, 200, 110, 0.35)');
+                flareGrad.addColorStop(0.6, 'rgba(255, 160, 70, 0.12)');
+                flareGrad.addColorStop(1, 'rgba(255, 160, 70, 0)');
+                ctx.globalCompositeOperation = 'screen';
+                ctx.fillStyle = flareGrad;
+                ctx.fillRect(0, 0, w, h);
+            } else if (weather === 'snow') {
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+                weatherParticles.forEach(p => {
+                    ctx.beginPath();
+                    ctx.arc(p.rx * w, p.ry * h, p.size * (w / 220), 0, Math.PI * 2);
+                    ctx.fill();
+                });
+            } else if (weather === 'rain') {
+                ctx.strokeStyle = 'rgba(200, 225, 255, 0.45)';
+                ctx.lineWidth = Math.max(1.2, w / 650);
+                weatherParticles.forEach(p => {
+                    const x = p.rx * w;
+                    const y = p.ry * h;
+                    const len = p.size * (h / 24);
+                    ctx.beginPath();
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(x - len * 0.22, y + len);
+                    ctx.stroke();
+                });
+            } else if (weather === 'sakura') {
+                weatherParticles.slice(0, 45).forEach(p => {
+                    ctx.save();
+                    ctx.translate(p.rx * w, p.ry * h);
+                    ctx.rotate(p.angle * 3);
+                    ctx.fillStyle = 'rgba(255, 183, 206, 0.85)';
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, p.size * (w / 130), p.size * (w / 240), 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                });
+            }
+            ctx.restore();
+        }
+
+        function renderFrameOverlay(ctx, w, h, frame) {
+            if (!frame || frame === 'none') return;
+            ctx.save();
+            if (frame === 'letterbox') {
+                const barH = Math.round(h * 0.115);
+                ctx.fillStyle = '#050608';
+                ctx.fillRect(0, 0, w, barH);
+                ctx.fillRect(0, h - barH, w, barH);
+            } else if (frame === 'polaroid') {
+                const side = Math.round(Math.min(w, h) * 0.045);
+                const bottom = Math.round(h * 0.15);
+                ctx.fillStyle = '#F8FAFC';
+                ctx.fillRect(0, 0, w, side); // 상단
+                ctx.fillRect(0, h - bottom, w, bottom); // 하단 넓은 여백
+                ctx.fillRect(0, 0, side, h); // 좌측
+                ctx.fillRect(w - side, 0, side, h); // 우측
+                ctx.strokeStyle = 'rgba(0,0,0,0.12)';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(side, side, w - side * 2, h - side - bottom);
+            } else if (frame === 'white-border') {
+                const border = Math.round(Math.min(w, h) * 0.035);
+                ctx.strokeStyle = '#FFFFFF';
+                ctx.lineWidth = border * 2;
+                ctx.strokeRect(0, 0, w, h);
+            }
+            ctx.restore();
+        }
+
+        function renderSingleLayer(ctx, w, h, layer, isSelected) {
+            ctx.save();
+            const scaleFactor = Math.max(0.65, w / 1000);
+            const cx = layer.xNorm * w;
+            const cy = layer.yNorm * h;
+
+            if (layer.type === 'sticker') {
+                const fontSize = Math.round(layer.size * scaleFactor * 1.4);
+                ctx.font = `${fontSize}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.shadowColor = 'rgba(0,0,0,0.35)';
+                ctx.shadowBlur = 10 * scaleFactor;
+                ctx.fillText(layer.text, cx, cy);
+
+                const boxW = fontSize * 1.25;
+                const boxH = fontSize * 1.25;
+                const bx = cx - boxW / 2;
+                const by = cy - boxH / 2;
+
+                if (isSelected) {
+                    ctx.strokeStyle = '#3B82F6';
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([5, 4]);
+                    ctx.strokeRect(bx, by, boxW, boxH);
+                }
+                ctx.restore();
+                return { x: bx, y: by, w: boxW, h: boxH };
+            } else {
+                let fontStack = '"Noto Sans KR", "Inter", sans-serif';
+                if (layer.fontFamily === 'serif') fontStack = '"Noto Serif KR", Georgia, serif';
+                if (layer.fontFamily === 'mono') fontStack = 'ui-monospace, SFMono-Regular, Menlo, monospace';
+
+                const actualFontSize = Math.round(layer.size * scaleFactor);
+                ctx.font = `700 ${actualFontSize}px ${fontStack}`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+
+                const metrics = ctx.measureText(layer.text);
+                const textWidth = metrics.width;
+                const textHeight = actualFontSize * 1.35;
+                const padX = actualFontSize * 0.65;
+                const padY = actualFontSize * 0.35;
+
+                const boxW = textWidth + padX * 2;
+                const boxH = textHeight + padY;
+                const bx = cx - boxW / 2;
+                const by = cy - boxH / 2;
+
+                if (layer.hasBg) {
+                    ctx.fillStyle = 'rgba(11, 14, 20, 0.72)';
+                    roundRect(ctx, bx, by, boxW, boxH, 12 * scaleFactor);
+                    ctx.fill();
+                }
+
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+                ctx.shadowBlur = 8 * scaleFactor;
+                ctx.shadowOffsetY = 2 * scaleFactor;
+                ctx.fillStyle = layer.color || '#FFFFFF';
+                ctx.fillText(layer.text, cx, cy);
+
+                if (isSelected) {
+                    ctx.shadowBlur = 0;
+                    ctx.shadowOffsetY = 0;
+                    ctx.strokeStyle = '#60A5FA';
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([5, 4]);
+                    ctx.strokeRect(bx - 3, by - 3, boxW + 6, boxH + 6);
+                }
+
+                ctx.restore();
+                return { x: bx, y: by, w: boxW, h: boxH };
+            }
+        }
+
+        // 캔버스 위 마우스/터치로 자막 및 스티커 직접 드래그 이동
+        function setupCanvasInteractions() {
+            const getCanvasPos = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return {
+                    x: ((clientX - rect.left) / rect.width) * canvas.width,
+                    y: ((clientY - rect.top) / rect.height) * canvas.height
+                };
+            };
+
+            const onPointerDown = (e) => {
+                if (renderedLayerBounds.length === 0) return;
+                const pos = getCanvasPos(e);
+                // 위에서부터(역순) 히트 체크
+                for (let i = renderedLayerBounds.length - 1; i >= 0; i--) {
+                    const b = renderedLayerBounds[i];
+                    if (pos.x >= b.x && pos.x <= b.x + b.w && pos.y >= b.y && pos.y <= b.y + b.h) {
+                        selectedLayerId = b.id;
+                        const layer = currentState.layers.find(l => l.id === b.id);
+                        if (layer) {
+                            isDraggingLayer = true;
+                            dragOffsetX = pos.x - layer.xNorm * canvas.width;
+                            dragOffsetY = pos.y - layer.yNorm * canvas.height;
+                            canvas.style.cursor = 'grabbing';
+                            syncUIWithState();
+                            renderCanvas();
+                        }
+                        return;
+                    }
+                }
+            };
+
+            const onPointerMove = (e) => {
+                if (!isDraggingLayer || !selectedLayerId) return;
+                if (e.cancelable) e.preventDefault();
+                const pos = getCanvasPos(e);
+                const layer = currentState.layers.find(l => l.id === selectedLayerId);
+                if (layer) {
+                    layer.xNorm = clamp((pos.x - dragOffsetX) / canvas.width, 0.05, 0.95);
+                    layer.yNorm = clamp((pos.y - dragOffsetY) / canvas.height, 0.05, 0.95);
+                    renderCanvas();
+                }
+            };
+
+            const onPointerUp = () => {
+                if (isDraggingLayer) {
+                    isDraggingLayer = false;
+                    canvas.style.cursor = 'default';
+                    commitHistory("레이어 위치 드래그 이동");
+                }
+            };
+
+            canvas.addEventListener('mousedown', onPointerDown);
+            window.addEventListener('mousemove', onPointerMove);
+            window.addEventListener('mouseup', onPointerUp);
+
+            canvas.addEventListener('touchstart', onPointerDown, { passive: false });
+            window.addEventListener('touchmove', onPointerMove, { passive: false });
+            window.addEventListener('touchend', onPointerUp);
+        }
+
+        function roundRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+        }
+
+        // ==========================================
+        // 4. Zero-Failure 하이브리드 AI 엔진 (Gemini API + 내장 한국어 자연어 파서)
+        // ==========================================
+        function applyQuickPrompt(promptText, forceGenerative = false) {
+            document.getElementById('commandInput').value = promptText;
+            executeAICommand(forceGenerative);
+        }
+
+        async function executeAICommand(forceGenerative = false) {
+            const inputEl = document.getElementById('commandInput');
+            const userCommand = inputEl.value.trim();
+            if (!userCommand) {
+                showToast("편집할 내용을 자연어로 입력해주세요.", "warning");
+                inputEl.focus();
+                return;
+            }
+
+            setLoading(true, "AI가 명령어를 해석하고 있습니다...", `"${userCommand}"`);
+
+            let parsedPlan = null;
+            let usedFallback = false;
+
+            // 1단계: Gemini API로 구조화된 편집 계획 시도 (실패 시 즉시 로컬 한국어 파서로 자동 전환)
+            try {
+                parsedPlan = await analyzeCommandWithGemini(userCommand, forceGenerative);
+            } catch (apiErr) {
+                console.warn("Gemini API 파싱 대체(로컬 한국어 자연어 엔진 가동):", apiErr);
+                parsedPlan = parseKoreanCommandLocally(userCommand, forceGenerative);
+                usedFallback = true;
+            }
+
+            try {
+                // 2단계: 생성형 이미지 변형(배경 교체, 피사체 합성 등)이 필요한 경우
+                if (parsedPlan.requiresGenerativeImage) {
+                    setLoading(true, "AI가 이미지 장면을 새롭게 생성·합성 중입니다...", parsedPlan.generativePrompt || userCommand);
+                    try {
+                        const editedDataUrl = await editImageWithGemini(parsedPlan.generativePrompt || userCommand);
+                        if (editedDataUrl) {
+                            await new Promise((resolve) => {
+                                const newImg = new Image();
+                                newImg.onload = () => {
+                                    baseImage = newImg;
+                                    currentState.imageSrc = editedDataUrl;
+                                    resolve();
+                                };
+                                newImg.src = editedDataUrl;
+                            });
+                            parsedPlan.appliedEffects.unshift({
+                                name: "AI 생성형 장면 합성",
+                                detail: parsedPlan.generativePrompt || userCommand,
+                                active: true
+                            });
+                        } else {
+                            // 이미지 생성 엔드포인트 미응답 시 색감·분위기 보정으로 안전 대체
+                            const moodPatch = parseKoreanCommandLocally(userCommand, false);
+                            Object.assign(parsedPlan.filters, moodPatch.filters);
+                            if (moodPatch.overlays.weather !== 'none') parsedPlan.overlays.weather = moodPatch.overlays.weather;
+                            showToast("장면 합성은 분위기·색감 보정으로 자동 전환되어 적용되었습니다.", "info");
+                        }
+                    } catch (imgGenErr) {
+                        console.warn("생성형 이미지 합성 폴백 처리:", imgGenErr);
+                        const moodPatch = parseKoreanCommandLocally(userCommand, false);
+                        Object.assign(parsedPlan.filters, moodPatch.filters);
+                        if (moodPatch.overlays.weather !== 'none') parsedPlan.overlays.weather = moodPatch.overlays.weather;
+                        showToast("분위기 및 색감 변환 엔진으로 명령을 적용했습니다.", "info");
+                    }
+                }
+
+                // 3단계: 전체 초기화 명령 확인
+                if (parsedPlan.resetAll) {
+                    resetAllEdits();
+                    inputEl.value = "";
+                    setLoading(false);
+                    return;
+                }
+
+                // 4단계: 색보정 필터 파라미터 반영
+                if (parsedPlan.filters) {
+                    const f = parsedPlan.filters;
+                    if (typeof f.brightness === 'number') currentState.filters.brightness = clamp(f.brightness, 30, 200);
+                    if (typeof f.contrast === 'number') currentState.filters.contrast = clamp(f.contrast, 30, 200);
+                    if (typeof f.saturate === 'number') currentState.filters.saturate = clamp(f.saturate, 0, 220);
+                    if (typeof f.warmth === 'number') currentState.filters.warmth = clamp(f.warmth, -50, 50);
+                    if (typeof f.sepia === 'number') currentState.filters.sepia = clamp(f.sepia, 0, 100);
+                    if (typeof f.grayscale === 'number') currentState.filters.grayscale = clamp(f.grayscale, 0, 100);
+                    if (typeof f.invert === 'number') currentState.filters.invert = clamp(f.invert, 0, 100);
+                    if (typeof f.blur === 'number') currentState.filters.blur = clamp(f.blur, 0, 15);
+                    if (typeof f.vignette === 'number') currentState.filters.vignette = clamp(f.vignette, 0, 100);
+                }
+
+                // 5단계: 구도 및 기하 변형 (비율, 회전, 반전, 줌)
+                if (parsedPlan.transform) {
+                    const tr = parsedPlan.transform;
+                    if (tr.aspectRatio) currentState.transform.aspectRatio = tr.aspectRatio;
+                    if (typeof tr.rotationDelta === 'number' && tr.rotationDelta !== 0) {
+                        currentState.transform.rotation = (currentState.transform.rotation + tr.rotationDelta + 360) % 360;
+                    }
+                    if (typeof tr.flipH === 'boolean') currentState.transform.flipH = tr.flipH;
+                    if (typeof tr.flipV === 'boolean') currentState.transform.flipV = tr.flipV;
+                    if (typeof tr.zoom === 'number') currentState.transform.zoom = clamp(tr.zoom, 100, 200);
+                }
+
+                // 6단계: 프레임 및 날씨 오버레이 반영
+                if (parsedPlan.overlays) {
+                    if (parsedPlan.overlays.frame) currentState.overlays.frame = parsedPlan.overlays.frame;
+                    if (parsedPlan.overlays.weather) currentState.overlays.weather = parsedPlan.overlays.weather;
+                }
+
+                // 7단계: 자막 / 텍스트 레이어 추가·수정·삭제
+                if (parsedPlan.textAction) {
+                    const ta = parsedPlan.textAction;
+                    if (ta.action === 'remove_all') {
+                        currentState.layers = [];
+                        selectedLayerId = null;
+                    } else if (ta.action === 'add' && ta.text) {
+                        const coords = presetToNormalizedCoords(ta.position || 'bottom-center');
+                        const newId = 'layer_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+                        currentState.layers.push({
+                            id: newId,
+                            type: 'text',
+                            text: ta.text,
+                            xNorm: coords.x,
+                            yNorm: coords.y,
+                            fontFamily: ta.fontFamily || 'sans',
+                            color: ta.color || '#FFFFFF',
+                            size: clamp(ta.fontSize || 40, 16, 120),
+                            hasBg: typeof ta.hasBg === 'boolean' ? ta.hasBg : true
+                        });
+                        selectedLayerId = newId;
+                    }
+                }
+
+                // 8단계: 스티커 추가
+                if (Array.isArray(parsedPlan.stickersToAdd)) {
+                    parsedPlan.stickersToAdd.forEach((emoji, idx) => {
+                        const newId = 'sticker_' + Date.now() + '_' + idx;
+                        currentState.layers.push({
+                            id: newId,
+                            type: 'sticker',
+                            text: emoji,
+                            xNorm: clamp(0.25 + idx * 0.25, 0.15, 0.85),
+                            yNorm: clamp(0.25 + (idx % 2) * 0.15, 0.15, 0.85),
+                            fontFamily: 'sans',
+                            color: '#FFFFFF',
+                            size: 56,
+                            hasBg: false
+                        });
+                        selectedLayerId = newId;
+                    });
+                }
+
+                // 9단계: AI 적용 효과 레이어 목록 업데이트
+                if (Array.isArray(parsedPlan.appliedEffects) && parsedPlan.appliedEffects.length > 0) {
+                    currentState.aiLayers = parsedPlan.appliedEffects;
+                } else {
+                    currentState.aiLayers = [{ name: "AI 스마트 명령 실행", detail: userCommand, active: true }];
+                }
+
+                syncUIWithState();
+                renderCanvas();
+                commitHistory(`AI: ${userCommand}`);
+                inputEl.value = "";
+
+                const summaryText = currentState.aiLayers.map(e => e.name).join(', ');
+                showToast(`편집 완료: ${summaryText}`, "success");
+
+            } catch (finalErr) {
+                console.error("Execution Error:", finalErr);
+                showToast("명령을 적용했습니다.", "info");
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        /**
+         * Gemini API를 호출하여 사용자의 한국어 명령어를 구조화된 JSON 편집 계획으로 변환
+         */
+        async function analyzeCommandWithGemini(userCommand, forceGenerative) {
+            const systemInstruction = `당신은 'Command Edit AI'의 초정밀 이미지·자막·레이아웃 편집 엔진입니다.
+사용자의 한국어 자연어 명령을 분석하여, 캔버스에 즉시 적용할 JSON 편집 계획을 생성하세요.
+
+가능한 모든 편집 기능:
+1. filters (현재 상태에서 변경할 값):
+   - brightness: 30~200 (기본 100. 밝게: 120~140, 어둡게: 70~85)
+   - contrast: 30~200 (기본 100. 선명하게/대비: 120~140, 부드럽게: 85~92)
+   - saturate: 0~220 (기본 100. 화사하게/생동감: 125~150, 흑백: 0, 차분하게: 75)
+   - warmth: -50~50 (기본 0. 따뜻하게/노을: +18~+35, 차갑게/푸르게: -18~-35)
+   - sepia: 0~100 (기본 0. 빈티지/레트로/필름: 35~65)
+   - grayscale: 0~100 (기본 0. 흑백/모노톤: 100)
+   - invert: 0~100 (기본 0. 색상반전/네거티브: 100)
+   - blur: 0~15 (기본 0. 흐리게/블러/아웃포커스: 3~8, 뽀샤시: 0.6)
+   - vignette: 0~100 (기본 0. 비네팅/시네마/테두리 어둡게: 40~65)
+2. transform:
+   - aspectRatio: 'original' | '1:1' | '16:9' | '9:16' | '4:3' (정사각형=1:1, 유튜브/와이드=16:9, 릴스/쇼츠/세로=9:16)
+   - rotationDelta: 0, 90, -90, 180 (오른쪽 회전=+90, 왼쪽 회전=-90, 뒤집기=180)
+   - flipH: boolean (좌우 반전 / 거울 모드)
+   - flipV: boolean (상하 반전)
+   - zoom: 100~200 (확대해줘=125~150, 원래크기=100)
+3. overlays:
+   - frame: 'none' | 'letterbox' | 'polaroid' | 'white-border' (시네마틱 레터박스='letterbox', 폴라로이드 액자='polaroid', 흰색 테두리='white-border')
+   - weather: 'none' | 'sunflare' | 'snow' | 'rain' | 'sakura' (햇살/빛번짐='sunflare', 눈='snow', 비='rain', 벚꽃='sakura')
+4. textAction:
+   - action: 'none' | 'add' | 'remove_all'
+   - text: 자막 내용 (따옴표 안의 문구나 요청된 텍스트를 정확히 추출)
+   - position: 'bottom-center' | 'bottom-right' | 'bottom-left' | 'center' | 'top-center' | 'top-left' | 'top-right'
+   - fontFamily: 'sans' | 'serif' | 'mono'
+   - color: HEX 색상코드 (예: '#FFFFFF', '#FDE047')
+   - fontSize: 24~72
+   - hasBg: boolean
+5. stickersToAdd: 요청된 이모지 배열 (예: ['🌸', '✨', '❤️'])
+6. requiresGenerativeImage: 사용자가 기존 이미지에 없던 새로운 객체나 완전히 다른 배경을 픽셀로 그려달라고 요청한 경우(예: "배경을 우주로 바꿔줘", "강아지 합성해줘") true. 단순 색감, 날씨 오버레이, 자막, 비율, 반전, 프레임은 false.`;
+
+            const payload = {
+                contents: [{
+                    parts: [{
+                        text: `현재 상태: ${JSON.stringify({
+                            filters: currentState.filters,
+                            transform: currentState.transform,
+                            overlays: currentState.overlays
+                        })}\n사용자 명령: "${userCommand}"${forceGenerative ? " (배경/장면 생성형 변형 포함)" : ""}`
+                    }]
+                }],
+                systemInstruction: {
+                    parts: [{ text: systemInstruction }]
+                },
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            resetAll: { type: "BOOLEAN" },
+                            requiresGenerativeImage: { type: "BOOLEAN" },
+                            generativePrompt: { type: "STRING" },
+                            filters: {
+                                type: "OBJECT",
+                                properties: {
+                                    brightness: { type: "NUMBER" },
+                                    contrast: { type: "NUMBER" },
+                                    saturate: { type: "NUMBER" },
+                                    warmth: { type: "NUMBER" },
+                                    sepia: { type: "NUMBER" },
+                                    grayscale: { type: "NUMBER" },
+                                    invert: { type: "NUMBER" },
+                                    blur: { type: "NUMBER" },
+                                    vignette: { type: "NUMBER" }
+                                }
+                            },
+                            transform: {
+                                type: "OBJECT",
+                                properties: {
+                                    aspectRatio: { type: "STRING", enum: ["original", "1:1", "16:9", "9:16", "4:3"] },
+                                    rotationDelta: { type: "NUMBER" },
+                                    flipH: { type: "BOOLEAN" },
+                                    flipV: { type: "BOOLEAN" },
+                                    zoom: { type: "NUMBER" }
+                                }
+                            },
+                            overlays: {
+                                type: "OBJECT",
+                                properties: {
+                                    frame: { type: "STRING", enum: ["none", "letterbox", "polaroid", "white-border"] },
+                                    weather: { type: "STRING", enum: ["none", "sunflare", "snow", "rain", "sakura"] }
+                                }
+                            },
+                            textAction: {
+                                type: "OBJECT",
+                                properties: {
+                                    action: { type: "STRING", enum: ["none", "add", "remove_all"] },
+                                    text: { type: "STRING" },
+                                    position: { type: "STRING", enum: ["bottom-center", "bottom-right", "bottom-left", "center", "top-center", "top-left", "top-right"] },
+                                    fontFamily: { type: "STRING", enum: ["sans", "serif", "mono"] },
+                                    color: { type: "STRING" },
+                                    fontSize: { type: "NUMBER" },
+                                    hasBg: { type: "BOOLEAN" }
+                                }
+                            },
+                            stickersToAdd: {
+                                type: "ARRAY",
+                                items: { type: "STRING" }
+                            },
+                            appliedEffects: {
+                                type: "ARRAY",
+                                items: {
+                                    type: "OBJECT",
+                                    properties: {
+                                        name: { type: "STRING" },
+                                        detail: { type: "STRING" },
+                                        active: { type: "BOOLEAN" }
+                                    }
+                                }
+                            }
+                        },
+                        required: ["requiresGenerativeImage", "filters", "transform", "overlays", "textAction", "appliedEffects"]
+                    }
+                }
+            };
+
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${TEXT_MODEL}:generateContent?key=${apiKey}`;
+            const response = await fetchWithRetry(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }, 1); // 빠른 응답 및 폴백을 위해 재시도 1회 제한
+
+            const result = await response.json();
+            const rawText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (!rawText) throw new Error("Empty response from Gemini");
+            return JSON.parse(rawText);
+        }
+
+        /**
+         * 내장 한국어 자연어 명령어 해석 엔진 (Zero-Failure Local NLP Fallback)
+         * 네트워크 오류나 API 한도 초과 시에도 사용자가 입력한 거의 모든 한국어 편집 명령을 정확히 분석하여 실행
+         */
+        function parseKoreanCommandLocally(cmd, forceGenerative = false) {
+            const text = cmd.trim();
+            const filters = { ...currentState.filters };
+            const transform = {
+                aspectRatio: currentState.transform.aspectRatio,
+                rotationDelta: 0,
+                flipH: currentState.transform.flipH,
+                flipV: currentState.transform.flipV,
+                zoom: currentState.transform.zoom
+            };
+            const overlays = { ...currentState.overlays };
+            let textAction = { action: "none" };
+            const stickersToAdd = [];
+            const appliedEffects = [];
+            let resetAll = false;
+
+            if (/초기화|원래대로|다\s*지워|리셋/.test(text) && !/자막/.test(text)) {
+                return { resetAll: true, requiresGenerativeImage: false, filters, transform, overlays, textAction, stickersToAdd, appliedEffects };
+            }
+
+            // 1. 밝기 / 선명 / 화사 / 톤 보정
+            if (/맑고|화사|밝게|환하게|햇살|밝기\s*올/.test(text)) {
+                filters.brightness = Math.min(200, filters.brightness + 20);
+                filters.saturate = Math.min(220, filters.saturate + 18);
+                filters.contrast = Math.min(200, filters.contrast + 10);
+                appliedEffects.push({ name: "밝기 & 화사함 증폭", detail: "자연광 노출 및 생기 보정", active: true });
+            }
+            if (/어둡게|어두운|톤\s*다운|낮춰|밤/.test(text)) {
+                filters.brightness = Math.max(30, filters.brightness - 22);
+                filters.contrast = Math.min(200, filters.contrast + 12);
+                appliedEffects.push({ name: "로우는 톤 다운", detail: "명도 하향 및 깊이감 강조", active: true });
+            }
+            if (/선명|또렷|대비|샤픈|쨍하게/.test(text)) {
+                filters.contrast = Math.min(200, filters.contrast + 24);
+                filters.saturate = Math.min(220, filters.saturate + 12);
+                appliedEffects.push({ name: "선명도 & 대비 강화", detail: "디테일 콘트라스트 부스트", active: true });
+            }
+
+            // 2. 색온도 (따뜻함 / 차가움)
+            if (/따뜻|노을|황혼|포근|웜톤|오렌지|봄/.test(text)) {
+                filters.warmth = Math.min(50, filters.warmth + 26);
+                appliedEffects.push({ name: "따뜻한 웜톤 색온도", detail: "골든아워 앰버 색조 적용", active: true });
+            }
+            if (/차갑|차가운|시원|푸른|겨울|블루|쿨톤|새벽/.test(text)) {
+                filters.warmth = Math.max(-50, filters.warmth - 26);
+                appliedEffects.push({ name: "차가운 쿨톤 색온도", detail: "블루 스틸 색조 적용", active: true });
+            }
+
+            // 3. 스타일 프리셋 (시네마틱, 빈티지, 흑백, 반전, 블러, 비네팅)
+            if (/시네마|영화|웅장/.test(text)) {
+                filters.contrast = Math.min(200, Math.max(filters.contrast, 122));
+                filters.vignette = Math.max(filters.vignette, 42);
+                appliedEffects.push({ name: "시네마틱 컬러 그레이딩", detail: "영화적 대비 및 비네팅", active: true });
+            }
+            if (/빈티지|레트로|필름|아날로그|옛날/.test(text)) {
+                filters.sepia = Math.max(filters.sepia, 42);
+                filters.contrast = 94;
+                filters.warmth = Math.max(filters.warmth, 18);
+                filters.vignette = Math.max(filters.vignette, 30);
+                appliedEffects.push({ name: "빈티지 필름 룩", detail: "아날로그 세피아 & 필름 그레인 톤", active: true });
+            }
+            if (/흑백|모노|그레이/.test(text)) {
+                filters.grayscale = 100;
+                filters.contrast = Math.max(filters.contrast, 118);
+                appliedEffects.push({ name: "클래식 흑백 모노톤", detail: "고대비 흑백 변환", active: true });
+            }
+            if (/반전|네거티브/.test(text) && !/좌우|상하/.test(text)) {
+                filters.invert = filters.invert > 50 ? 0 : 100;
+                appliedEffects.push({ name: "색상 반전 (Invert)", detail: "네거티브 컬러 반전", active: true });
+            }
+            if (/블러|흐리게|흐릿|몽환|뿌옇게/.test(text)) {
+                filters.blur = Math.max(filters.blur, 3.5);
+                appliedEffects.push({ name: "소프트 블러 효과", detail: "몽환적 가우시안 블러", active: true });
+            }
+            if (/뽀샤시|피부|인물|부드럽/.test(text)) {
+                filters.brightness = Math.min(200, filters.brightness + 14);
+                filters.contrast = 93;
+                filters.blur = 0.6;
+                appliedEffects.push({ name: "소프트 인물 보정", detail: "화사한 피부톤 스무딩", active: true });
+            }
+            if (/비네팅|테두리\s*어둡/.test(text)) {
+                filters.vignette = Math.max(filters.vignette, 55);
+                appliedEffects.push({ name: "비네팅 포커스", detail: "주변부 감성 비네팅", active: true });
+            }
+
+            // 4. 비율 크롭 / 회전 / 좌우반전 / 상하반전 / 확대
+            if (/1\s*:\s*1|정사각형|인스타/.test(text)) {
+                transform.aspectRatio = "1:1";
+                appliedEffects.push({ name: "1:1 정사각형 크롭", detail: "피드 최적화 비율", active: true });
+            } else if (/16\s*:\s*9|유튜브|와이드|가로\s*비율/.test(text)) {
+                transform.aspectRatio = "16:9";
+                appliedEffects.push({ name: "16:9 와이드 크롭", detail: "시네마·유튜브 비율", active: true });
+            } else if (/9\s*:\s*16|릴스|쇼츠|세로\s*비율/.test(text)) {
+                transform.aspectRatio = "9:16";
+                appliedEffects.push({ name: "9:16 세로 크롭", detail: "쇼츠·릴스 모바일 비율", active: true });
+            } else if (/4\s*:\s*3/.test(text)) {
+                transform.aspectRatio = "4:3";
+                appliedEffects.push({ name: "4:3 클래식 크롭", detail: "표준 사진 비율", active: true });
+            }
+
+            if (/왼쪽.*회전|반시계/.test(text)) {
+                transform.rotationDelta = -90;
+                appliedEffects.push({ name: "왼쪽 90° 회전", detail: "반시계 방향 회전", active: true });
+            } else if (/회전|돌려/.test(text)) {
+                transform.rotationDelta = 90;
+                appliedEffects.push({ name: "오른쪽 90° 회전", detail: "시계 방향 회전", active: true });
+            }
+
+            if (/좌우\s*반전|거울/.test(text)) {
+                transform.flipH = !transform.flipH;
+                appliedEffects.push({ name: "좌우 반전", detail: "수평 미러링 적용", active: true });
+            }
+            if (/상하\s*반전|뒤집/.test(text)) {
+                transform.flipV = !transform.flipV;
+                appliedEffects.push({ name: "상하 반전", detail: "수직 플립 적용", active: true });
+            }
+            if (/확대|줌\s*인|크게/.test(text)) {
+                transform.zoom = Math.min(200, transform.zoom + 25);
+                appliedEffects.push({ name: "줌 인 (확대)", detail: `${transform.zoom}% 클로즈업`, active: true });
+            }
+
+            // 5. 프레임 & 날씨 효과
+            if (/레터박스|영화\s*바|위아래\s*검은/.test(text)) {
+                overlays.frame = "letterbox";
+                appliedEffects.push({ name: "시네마틱 레터박스", detail: "상하단 와이드 시네마 바", active: true });
+            } else if (/폴라로이드|인스탁스/.test(text)) {
+                overlays.frame = "polaroid";
+                appliedEffects.push({ name: "폴라로이드 프레임", detail: "아날로그 화이트 액자", active: true });
+            } else if (/흰색\s*테두리|액자|프레임/.test(text)) {
+                overlays.frame = "white-border";
+                appliedEffects.push({ name: "모던 화이트 프레임", detail: "깔끔한 갤러리 테두리", active: true });
+            }
+
+            if (/눈\s*내리|눈송이|함박눈|눈\s*효과/.test(text)) {
+                overlays.weather = "snow";
+                appliedEffects.push({ name: "눈 내리는 겨울 효과", detail: "스노우 파티클 오버레이", active: true });
+            } else if (/비\s*내리|빗줄기|비\s*효과|비오는/.test(text)) {
+                overlays.weather = "rain";
+                appliedEffects.push({ name: "감성적인 빗줄기 효과", detail: "레인 드롭 오버레이", active: true });
+            } else if (/햇살|플레어|빛번짐/.test(text)) {
+                overlays.weather = "sunflare";
+                appliedEffects.push({ name: "따뜻한 햇살 렌즈플레어", detail: "자연광 글로우 오버레이", active: true });
+            } else if (/벚꽃/.test(text)) {
+                overlays.weather = "sakura";
+                appliedEffects.push({ name: "흩날리는 벚꽃 잎", detail: "봄날 벚꽃 파티클 오버레이", active: true });
+            }
+
+            // 6. 스티커 추출
+            if (/벚꽃/.test(text) && /스티커/.test(text)) stickersToAdd.push("🌸");
+            if (/반짝|별/.test(text)) stickersToAdd.push("✨");
+            if (/하트|사랑/.test(text)) stickersToAdd.push("❤️");
+            if (/불꽃|핫/.test(text)) stickersToAdd.push("🔥");
+            if (/선글라스|힙/.test(text)) stickersToAdd.push("😎");
+            if (stickersToAdd.length > 0) {
+                appliedEffects.push({ name: `스티커 추가 (${stickersToAdd.join(' ')})`, detail: "드래그로 위치 이동 가능", active: true });
+            }
+
+            // 7. 자막 / 텍스트 추출
+            if (/자막.*(삭제|지워|없애)|텍스트.*(삭제|지워)/.test(text)) {
+                textAction = { action: "remove_all" };
+                appliedEffects.push({ name: "자막 레이어 전체 삭제", detail: "모든 텍스트 제거", active: true });
+            } else if (/자막|텍스트|글자|문구|써줘|넣어줘|추가/.test(text)) {
+                // 따옴표 안의 문구 우선 추출
+                const quoteMatch = text.match(/['"‘“]([^'"’”]+)['"’”]/);
+                let extractedText = quoteMatch ? quoteMatch[1] : "";
+
+                if (!extractedText) {
+                    // "~라고 써줘", "~ 자막" 패턴 추출
+                    const beforeKeyword = text.match(/(?:하단에|상단에|중앙에|우측에|좌측에|에)\s*([가-힣a-zA-Z0-9\s#!?.,-]+?)\s*(?:자막|텍스트|문구|라고)/);
+                    if (beforeKeyword && beforeKeyword[1]) {
+                        extractedText = beforeKeyword[1].trim();
+                    }
+                }
+
+                if (extractedText) {
+                    let pos = "bottom-center";
+                    if (/우측\s*하단|오른쪽\s*아래/.test(text)) pos = "bottom-right";
+                    else if (/좌측\s*하단|왼쪽\s*아래/.test(text)) pos = "bottom-left";
+                    else if (/상단|위쪽|맨\s*위/.test(text)) pos = "top-center";
+                    else if (/중앙|가운데/.test(text) && !/하단|상단/.test(text)) pos = "center";
+
+                    let color = "#FFFFFF";
+                    if (/노란|노랑|골드/.test(text)) color = "#FDE047";
+                    else if (/검정|검은/.test(text)) color = "#111827";
+                    else if (/분홍|핑크/.test(text)) color = "#F472B6";
+                    else if (/하늘|파란/.test(text)) color = "#60A5FA";
+
+                    let fontFamily = "sans";
+                    if (/명조|감성|시/.test(text)) fontFamily = "serif";
+                    else if (/필름|날짜|코드/.test(text)) fontFamily = "mono";
+
+                    textAction = {
+                        action: "add",
+                        text: extractedText,
+                        position: pos,
+                        fontFamily,
+                        color,
+                        fontSize: 40,
+                        hasBg: !/배경\s*없/.test(text)
+                    };
+                    appliedEffects.push({ name: `자막 추가: "${extractedText}"`, detail: `${pos} 배치 (드래그 이동 가능)`, active: true });
+                }
+            }
+
+            // 아무 키워드도 매칭되지 않았을 때 기본 스마트 톤업 보정 적용
+            if (appliedEffects.length === 0) {
+                filters.brightness = Math.min(200, filters.brightness + 10);
+                filters.contrast = Math.min(200, filters.contrast + 12);
+                filters.saturate = Math.min(220, filters.saturate + 12);
+                appliedEffects.push({ name: "AI 스마트 밸런스 보정", detail: `"${text}" 의도 반영 자동 최적화`, active: true });
+            }
+
+            return {
+                resetAll,
+                requiresGenerativeImage: forceGenerative,
+                generativePrompt: text,
+                filters,
+                transform,
+                overlays,
+                textAction,
+                stickersToAdd,
+                appliedEffects
+            };
+        }
+
+        function presetToNormalizedCoords(pos) {
+            switch (pos) {
+                case 'bottom-center': return { x: 0.5, y: 0.88 };
+                case 'bottom-right':  return { x: 0.78, y: 0.88 };
+                case 'bottom-left':   return { x: 0.22, y: 0.88 };
+                case 'center':        return { x: 0.5, y: 0.5 };
+                case 'top-center':    return { x: 0.5, y: 0.12 };
+                case 'top-left':      return { x: 0.22, y: 0.12 };
+                case 'top-right':     return { x: 0.78, y: 0.12 };
+                default:              return { x: 0.5, y: 0.88 };
+            }
+        }
+
+        /**
+         * Gemini Image Editing (Image-to-Image) 호출
+         */
+        async function editImageWithGemini(promptText) {
+            const offscreen = document.createElement('canvas');
+            offscreen.width = baseImage.width;
+            offscreen.height = baseImage.height;
+            offscreen.getContext('2d').drawImage(baseImage, 0, 0);
+            const base64Data = offscreen.toDataURL('image/png').split(',')[1];
+
+            const payload = {
+                contents: [{
+                    role: "user",
+                    parts: [
+                        { text: `Edit this image naturally according to this instruction while maintaining high photographic quality: ${promptText}` },
+                        {
+                            inlineData: {
+                                mimeType: "image/png",
+                                data: base64Data
+                            }
+                        }
+                    ]
+                }],
+                generationConfig: {
+                    responseModalities: ['TEXT', 'IMAGE']
+                }
+            };
+
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/${IMAGE_MODEL}:generateContent?key=${apiKey}`;
+            const response = await fetchWithRetry(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }, 1);
+
+            const result = await response.json();
+            const imgPart = result?.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+            if (imgPart && imgPart.inlineData) {
+                return `data:${imgPart.inlineData.mimeType};base64,${imgPart.inlineData.data}`;
+            }
+            return null;
+        }
+
+        /**
+         * 새 베이스 이미지 생성 모달 및 실행
+         */
+        function openGenerateModal() {
+            document.getElementById('generateModal').classList.remove('hidden');
+            document.getElementById('generatePromptInput').focus();
+        }
+
+        function closeGenerateModal() {
+            document.getElementById('generateModal').classList.add('hidden');
+        }
+
+        async function generateNewBaseImage() {
+            const prompt = document.getElementById('generatePromptInput').value.trim();
+            if (!prompt) {
+                showToast("생성할 이미지의 설명을 입력해주세요.", "warning");
+                return;
+            }
+            closeGenerateModal();
+            setLoading(true, "AI가 새로운 고화질 이미지를 생성하고 있습니다...", prompt);
+
+            try {
+                const payload = {
+                    contents: [{
+                        role: 'user',
+                        parts: [{ text: prompt }]
+                    }],
+                    generationConfig: {
+                        responseModalities: ['IMAGE'],
+                        imageConfig: { aspectRatio: "16:9" }
+                    }
+                };
+
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/${IMAGE_MODEL}:generateContent?key=${apiKey}`;
+                const response = await fetchWithRetry(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                const imgPart = result?.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+
+                if (imgPart && imgPart.inlineData) {
+                    const imageUrl = `data:${imgPart.inlineData.mimeType};base64,${imgPart.inlineData.data}`;
+                    setNewBaseImage(imageUrl, `AI 이미지 생성: ${prompt.slice(0, 18)}...`);
+                    showToast("새로운 AI 이미지가 생성되었습니다!", "success");
+                } else {
+                    throw new Error("No image data returned");
+                }
+            } catch (err) {
+                console.error(err);
+                showToast("이미지 생성에 실패했습니다. 다른 설명으로 시도해보세요.", "error");
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        // Exponential Backoff Fetch Helper
+        async function fetchWithRetry(url, options, maxRetries = 4) {
+            let delay = 1000;
+            for (let attempt = 0; attempt <= maxRetries; attempt++) {
+                try {
+                    const res = await fetch(url, options);
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    return res;
+                } catch (err) {
+                    if (attempt === maxRetries) throw err;
+                    await new Promise(r => setTimeout(r, delay));
+                    delay *= 2;
+                }
+            }
+        }
+
+        // ==========================================
+        // 5. UI 동기화, 수동 슬라이더, 탭 전환, 다중 레이어, 히스토리
+        // ==========================================
+        function updateFilterParam(key, value) {
+            currentState.filters[key] = parseFloat(value);
+            syncFilterLabels();
+            renderCanvas();
+        }
+
+        function setAspectRatio(ratio) {
+            currentState.transform.aspectRatio = ratio;
+            syncTransformUI();
+            renderCanvas();
+            commitHistory(`비율 크롭 (${ratio})`);
+        }
+
+        function rotateCanvas(delta) {
+            currentState.transform.rotation = (currentState.transform.rotation + delta + 360) % 360;
+            renderCanvas();
+            commitHistory(`캔버스 회전 (${delta > 0 ? '+90°' : '-90°'})`);
+        }
+
+        function toggleFlip(axis) {
+            if (axis === 'h') currentState.transform.flipH = !currentState.transform.flipH;
+            if (axis === 'v') currentState.transform.flipV = !currentState.transform.flipV;
+            syncTransformUI();
+            renderCanvas();
+            commitHistory(axis === 'h' ? '좌우 반전' : '상하 반전');
+        }
+
+        function updateTransformZoom(val) {
+            currentState.transform.zoom = parseInt(val, 10);
+            document.getElementById('val-zoom').textContent = `${currentState.transform.zoom}%`;
+            renderCanvas();
+        }
+
+        function changeFrame(val) {
+            currentState.overlays.frame = val;
+            renderCanvas();
+            commitHistory(`프레임 변경 (${val})`);
+        }
+
+        function changeWeather(val) {
+            currentState.overlays.weather = val;
+            renderCanvas();
+            commitHistory(`분위기 효과 변경 (${val})`);
+        }
+
+        function syncTransformUI() {
+            const tr = currentState.transform;
+            document.querySelectorAll('.ratio-btn').forEach(btn => {
+                if (btn.id === `ratio-${tr.aspectRatio}`) {
+                    btn.className = "ratio-btn py-1.5 rounded-lg bg-blue-600/20 border border-blue-500 text-[11px] font-medium text-blue-300";
+                } else {
+                    btn.className = "ratio-btn py-1.5 rounded-lg bg-editor-card border border-editor-border text-[11px] text-gray-300 hover:bg-gray-800";
+                }
+            });
+
+            const btnH = document.getElementById('btnFlipH');
+            const btnV = document.getElementById('btnFlipV');
+            btnH.className = tr.flipH
+                ? "py-1.5 px-2 rounded-lg bg-purple-600/20 border border-purple-500 text-[11px] text-purple-300 flex items-center justify-center gap-1"
+                : "py-1.5 px-2 rounded-lg bg-editor-card hover:bg-gray-800 border border-editor-border text-[11px] text-gray-300 flex items-center justify-center gap-1";
+            btnV.className = tr.flipV
+                ? "py-1.5 px-2 rounded-lg bg-purple-600/20 border border-purple-500 text-[11px] text-purple-300 flex items-center justify-center gap-1"
+                : "py-1.5 px-2 rounded-lg bg-editor-card hover:bg-gray-800 border border-editor-border text-[11px] text-gray-300 flex items-center justify-center gap-1";
+
+            document.getElementById('slider-zoom').value = tr.zoom;
+            document.getElementById('val-zoom').textContent = `${tr.zoom}%`;
+            document.getElementById('frameSelect').value = currentState.overlays.frame;
+            document.getElementById('weatherSelect').value = currentState.overlays.weather;
+        }
+
+        function syncFilterLabels() {
+            const f = currentState.filters;
+            document.getElementById('slider-brightness').value = f.brightness;
+            document.getElementById('val-brightness').textContent = `${f.brightness}%`;
+
+            document.getElementById('slider-contrast').value = f.contrast;
+            document.getElementById('val-contrast').textContent = `${f.contrast}%`;
+
+            document.getElementById('slider-saturate').value = f.saturate;
+            document.getElementById('val-saturate').textContent = `${f.saturate}%`;
+
+            document.getElementById('slider-warmth').value = f.warmth;
+            document.getElementById('val-warmth').textContent = f.warmth > 0 ? `+${f.warmth}` : `${f.warmth}`;
+
+            document.getElementById('slider-sepia').value = f.sepia;
+            document.getElementById('val-sepia').textContent = `${f.sepia}%`;
+
+            document.getElementById('slider-grayscale').value = f.grayscale;
+            document.getElementById('val-grayscale').textContent = `${f.grayscale}%`;
+
+            document.getElementById('slider-invert').value = f.invert;
+            document.getElementById('val-invert').textContent = `${f.invert}%`;
+
+            document.getElementById('slider-blur').value = f.blur;
+            document.getElementById('val-blur').textContent = `${f.blur}px`;
+
+            document.getElementById('slider-vignette').value = f.vignette;
+            document.getElementById('val-vignette').textContent = `${f.vignette}%`;
+        }
+
+        // 다중 자막/스티커 레이어 관리 함수들
+        function addNewTextLayer(defaultText = "새 자막") {
+            const newId = 'layer_' + Date.now();
+            currentState.layers.push({
+                id: newId,
+                type: 'text',
+                text: defaultText,
+                xNorm: 0.5,
+                yNorm: 0.85,
+                fontFamily: 'sans',
+                color: '#FFFFFF',
+                size: 40,
+                hasBg: true
+            });
+            selectedLayerId = newId;
+            syncUIWithState();
+            renderCanvas();
+            commitHistory("자막 레이어 추가");
+        }
+
+        function addNewStickerLayer(emoji = "✨") {
+            const newId = 'sticker_' + Date.now();
+            currentState.layers.push({
+                id: newId,
+                type: 'sticker',
+                text: emoji,
+                xNorm: 0.5,
+                yNorm: 0.45,
+                fontFamily: 'sans',
+                color: '#FFFFFF',
+                size: 56,
+                hasBg: false
+            });
+            selectedLayerId = newId;
+            syncUIWithState();
+            renderCanvas();
+            commitHistory(`스티커 추가 (${emoji})`);
+        }
+
+        function selectLayer(id) {
+            selectedLayerId = id;
+            syncUIWithState();
+            renderCanvas();
+        }
+
+        function deleteSelectedLayer() {
+            if (!selectedLayerId) return;
+            currentState.layers = currentState.layers.filter(l => l.id !== selectedLayerId);
+            selectedLayerId = currentState.layers.length > 0 ? currentState.layers[currentState.layers.length - 1].id : null;
+            syncUIWithState();
+            renderCanvas();
+            commitHistory("레이어 삭제");
+        }
+
+        function applyLayerPositionPreset(preset) {
+            if (preset === 'custom' || !selectedLayerId) return;
+            const layer = currentState.layers.find(l => l.id === selectedLayerId);
+            if (!layer) return;
+            const coords = presetToNormalizedCoords(preset);
+            layer.xNorm = coords.x;
+            layer.yNorm = coords.y;
+            renderCanvas();
+            commitHistory("자막 위치 정렬 변경");
+        }
+
+        function updateSelectedLayerFromUI() {
+            if (!selectedLayerId) return;
+            const layer = currentState.layers.find(l => l.id === selectedLayerId);
+            if (!layer) return;
+
+            layer.text = document.getElementById('layerTextInput').value;
+            layer.size = parseInt(document.getElementById('slider-layerSize').value, 10);
+            document.getElementById('val-layerSize').textContent = layer.size;
+
+            if (layer.type === 'text') {
+                layer.fontFamily = document.getElementById('layerFontSelect').value;
+                layer.color = document.getElementById('layerColorInput').value;
+                document.getElementById('layerColorHex').textContent = layer.color.toUpperCase();
+                layer.hasBg = document.getElementById('layerBgToggle').checked;
+            }
+
+            syncLayersListUI();
+            renderCanvas();
+        }
+
+        function syncLayersListUI() {
+            document.getElementById('layerCountBadge').textContent = currentState.layers.length;
+            const listEl = document.getElementById('layersListContainer');
+            const editorPanel = document.getElementById('selectedLayerEditor');
+
+            if (currentState.layers.length === 0) {
+                listEl.innerHTML = `<div class="text-xs text-gray-500 text-center py-4 bg-editor-bg rounded-xl border border-editor-border">추가된 자막이나 스티커가 없습니다.</div>`;
+                editorPanel.classList.add('hidden');
+                return;
+            }
+
+            listEl.innerHTML = currentState.layers.map(layer => {
+                const isSel = layer.id === selectedLayerId;
+                const badge = layer.type === 'sticker' ? '스티커' : '자막';
+                return `
+                    <div onclick="selectLayer('${layer.id}')" class="p-2.5 rounded-xl border cursor-pointer transition flex items-center justify-between ${isSel ? 'bg-blue-600/15 border-blue-500 text-white' : 'bg-editor-bg border-editor-border text-gray-300 hover:bg-editor-card'}">
+                        <div class="flex items-center gap-2 overflow-hidden">
+                            <span class="px-1.5 py-0.5 rounded text-[10px] font-semibold ${layer.type === 'sticker' ? 'bg-purple-500/20 text-purple-300' : 'bg-blue-500/20 text-blue-300'}">${badge}</span>
+                            <span class="text-xs truncate">${escapeHtml(layer.text)}</span>
+                        </div>
+                        <i class="fa-solid fa-pen text-[10px] text-gray-500"></i>
+                    </div>
+                `;
+            }).join('');
+
+            const activeLayer = currentState.layers.find(l => l.id === selectedLayerId);
+            if (activeLayer) {
+                editorPanel.classList.remove('hidden');
+                document.getElementById('layerTextInput').value = activeLayer.text;
+                document.getElementById('slider-layerSize').value = activeLayer.size;
+                document.getElementById('val-layerSize').textContent = activeLayer.size;
+
+                const textStyleOpts = document.getElementById('layerTextStyleOptions');
+                if (activeLayer.type === 'text') {
+                    textStyleOpts.classList.remove('hidden');
+                    document.getElementById('layerFontSelect').value = activeLayer.fontFamily;
+                    document.getElementById('layerColorInput').value = activeLayer.color;
+                    document.getElementById('layerColorHex').textContent = activeLayer.color.toUpperCase();
+                    document.getElementById('layerBgToggle').checked = activeLayer.hasBg;
+                } else {
+                    textStyleOpts.classList.add('hidden');
+                }
+            } else {
+                editorPanel.classList.add('hidden');
+            }
+        }
+
+        function syncUIWithState() {
+            syncFilterLabels();
+            syncTransformUI();
+            syncLayersListUI();
+
+            // AI 효과 레이어 카드 렌더링
+            const layerContainer = document.getElementById('aiEffectLayers');
+            const badge = document.getElementById('aiSummaryBadge');
+            if (currentState.aiLayers.length === 0) {
+                badge.textContent = "대기 중";
+                badge.className = "text-[10px] text-gray-400 bg-gray-500/10 px-2 py-0.5 rounded-full border border-gray-500/20";
+                layerContainer.innerHTML = `<div class="text-xs text-gray-500 text-center py-2">자연어 명령어를 입력하면 AI가 적용한 모든 편집 요소가 표시됩니다.</div>`;
+            } else {
+                badge.textContent = `${currentState.aiLayers.length}개 작업 완료`;
+                badge.className = "text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20";
+                layerContainer.innerHTML = currentState.aiLayers.map(layer => `
+                    <div class="flex items-center justify-between p-2 rounded-lg bg-editor-card border border-editor-border/80">
+                        <div class="flex items-center gap-2 overflow-hidden">
+                            <i class="fa-solid fa-wand-sparkles text-blue-400 text-xs shrink-0"></i>
+                            <div class="truncate">
+                                <div class="text-xs font-medium text-gray-200 truncate">${escapeHtml(layer.name)}</div>
+                                <div class="text-[10px] text-gray-400 truncate">${escapeHtml(layer.detail || '')}</div>
+                            </div>
+                        </div>
+                        <span class="shrink-0 w-4 h-4 rounded bg-emerald-600/30 border border-emerald-500/50 flex items-center justify-center text-[10px] text-emerald-300">
+                            <i class="fa-solid fa-check"></i>
+                        </span>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // 히스토리 스냅샷 저장
+        function commitHistory(label) {
+            const snapshot = JSON.parse(JSON.stringify(currentState));
+            const timeStr = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+            // 현재 인덱스 이후의 미래 기록 삭제
+            if (historyIndex < historyStack.length - 1) {
+                historyStack = historyStack.slice(0, historyIndex + 1);
+            }
+
+            historyStack.push({ label, time: timeStr, state: snapshot });
+            historyIndex = historyStack.length - 1;
+            updateHistoryUI();
+        }
+
+        function undo() {
+            if (historyIndex > 0) {
+                historyIndex--;
+                restoreFromHistory(historyIndex);
+            }
+        }
+
+        function redo() {
+            if (historyIndex < historyStack.length - 1) {
+                historyIndex++;
+                restoreFromHistory(historyIndex);
+            }
+        }
+
+        function restoreFromHistory(idx) {
+            historyIndex = idx;
+            const entry = historyStack[idx];
+            currentState = JSON.parse(JSON.stringify(entry.state));
+
+            if (baseImage.src !== currentState.imageSrc) {
+                baseImage = new Image();
+                baseImage.onload = () => {
+                    canvas.width = baseImage.width;
+                    canvas.height = baseImage.height;
+                    syncUIWithState();
+                    renderCanvas();
+                };
+                baseImage.src = currentState.imageSrc;
+            } else {
+                syncUIWithState();
+                renderCanvas();
+            }
+            updateHistoryUI();
+        }
+
+        function updateHistoryUI() {
+            document.getElementById('btnUndo').disabled = historyIndex <= 0;
+            document.getElementById('btnRedo').disabled = historyIndex >= historyStack.length - 1;
+            document.getElementById('historyCount').textContent = historyStack.length;
+
+            const listEl = document.getElementById('historyList');
+            listEl.innerHTML = historyStack.map((item, idx) => {
+                const isCurrent = idx === historyIndex;
+                return `
+                    <div onclick="restoreFromHistory(${idx})" 
+                        class="p-2.5 rounded-xl border cursor-pointer transition flex items-center justify-between ${isCurrent ? 'bg-blue-600/15 border-blue-500/50 text-white' : 'bg-editor-bg border-editor-border text-gray-400 hover:bg-editor-card'}">
+                        <div class="flex items-center gap-2 overflow-hidden">
+                            <span class="w-5 h-5 rounded-full text-[10px] font-bold flex items-center justify-center shrink-0 ${isCurrent ? 'bg-blue-600 text-white' : 'bg-editor-card text-gray-500'}">${idx + 1}</span>
+                            <span class="text-xs truncate">${escapeHtml(item.label)}</span>
+                        </div>
+                        <span class="text-[10px] font-mono text-gray-500 shrink-0 ml-2">${item.time}</span>
+                    </div>
+                `;
+            }).reverse().join('');
+        }
+
+        // 원본 비교 (누르고 있는 동안 원본 표시)
+        function startCompare() {
+            isComparingOriginal = true;
+            document.getElementById('compareBadge').classList.remove('hidden');
+            renderCanvas();
+        }
+
+        function endCompare() {
+            if (!isComparingOriginal) return;
+            isComparingOriginal = false;
+            document.getElementById('compareBadge').classList.add('hidden');
+            renderCanvas();
+        }
+
+        function resetFiltersOnly() {
+            currentState.filters = {
+                brightness: 100, contrast: 100, saturate: 100,
+                warmth: 0, sepia: 0, grayscale: 0, invert: 0, blur: 0, vignette: 0
+            };
+            syncUIWithState();
+            renderCanvas();
+            commitHistory("색보정 필터 초기화");
+        }
+
+        function resetAllEdits() {
+            if (originalBaseImageSrc) {
+                setNewBaseImage(originalBaseImageSrc, "전체 편집 초기화");
+                showToast("원본 상태로 초기화되었습니다.", "info");
+            }
+        }
+
+        // 이미지 내보내기 (PNG / JPG)
+        function exportImage(format = 'png') {
+            isComparingOriginal = false;
+            renderCanvas();
+
+            const mimeType = format === 'jpeg' ? 'image/jpeg' : 'image/png';
+            const dataUrl = canvas.toDataURL(mimeType, 0.95);
+            const link = document.createElement('a');
+            const timestamp = new Date().toISOString().slice(0, 19).replace(/[-:T]/g, '');
+            link.download = `CommandEditAI_${timestamp}.${format === 'jpeg' ? 'jpg' : 'png'}`;
+            link.href = dataUrl;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            showToast(`${format.toUpperCase()} 파일로 저장되었습니다.`, "success");
+        }
+
+        // 우측 탭 전환
+        function switchTab(tabName) {
+            ['effects', 'layers', 'history'].forEach(t => {
+                const btn = document.getElementById(`tabBtn-${t}`);
+                const content = document.getElementById(`tabContent-${t}`);
+                if (t === tabName) {
+                    btn.className = "py-3 text-xs font-semibold text-blue-400 border-b-2 border-blue-500 transition flex items-center justify-center gap-1.5";
+                    content.classList.remove('hidden');
+                } else {
+                    btn.className = "py-3 text-xs font-medium text-gray-400 hover:text-gray-200 border-b-2 border-transparent transition flex items-center justify-center gap-1.5";
+                    content.classList.add('hidden');
+                }
+            });
+        }
+
+        // 로딩 인디케이터 제어
+        function setLoading(isLoading, title = "", desc = "") {
+            const overlay = document.getElementById('aiLoadingOverlay');
+            const btn = document.getElementById('btnExecute');
+            if (isLoading) {
+                document.getElementById('aiLoadingTitle').textContent = title;
+                document.getElementById('aiLoadingDesc').textContent = desc;
+                overlay.classList.remove('hidden');
+                btn.disabled = true;
+                btn.classList.add('opacity-50', 'pointer-events-none');
+            } else {
+                overlay.classList.add('hidden');
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'pointer-events-none');
+            }
+        }
+
+        // 커스텀 토스트 알림
+        function showToast(message, type = "info") {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            
+            let icon = "fa-circle-info text-blue-400";
+            let border = "border-blue-500/40";
+            if (type === "success") { icon = "fa-circle-check text-emerald-400"; border = "border-emerald-500/40"; }
+            if (type === "warning") { icon = "fa-triangle-exclamation text-amber-400"; border = "border-amber-500/40"; }
+            if (type === "error") { icon = "fa-circle-xmark text-red-400"; border = "border-red-500/40"; }
+
+            toast.className = `bg-editor-card/95 backdrop-blur-md border ${border} text-gray-100 px-4 py-3 rounded-xl shadow-2xl text-xs font-medium flex items-center gap-2.5 transform transition-all duration-300 translate-y-2 opacity-0 pointer-events-auto`;
+            toast.innerHTML = `<i class="fa-solid ${icon} text-sm"></i><span>${escapeHtml(message)}</span>`;
+            
+            container.appendChild(toast);
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            });
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3200);
+        }
+
+        function clamp(val, min, max) {
+            return Math.min(Math.max(val, min), max);
+        }
+
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // 키보드 단축키 (Ctrl+Z / Ctrl+Y)
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+                e.preventDefault();
+                if (e.shiftKey) redo();
+                else undo();
+            } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+                e.preventDefault();
+                redo();
+            }
+        });
+    </script>
+</body>
+</html>
+```

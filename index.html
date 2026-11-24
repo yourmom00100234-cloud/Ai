@@ -226,21 +226,21 @@
 
                     <!-- 빠른 명령어 추천 칩 (Quick Prompts) -->
                     <div class="flex items-center gap-1.5 overflow-x-auto pt-2 pb-1 px-2 border-t border-editor-border/60 mt-1.5 no-scrollbar">
-                        <span class="text-[11px] text-gray-500 shrink-0 mr-1"><i class="fa-solid fa-bolt text-amber-400 mr-1"></i>원클릭 명령:</span>
+                        <span class="text-[11px] text-gray-500 shrink-0 mr-1"><i class="fa-solid fa-bolt text-amber-400 mr-1"></i>즉시 픽셀 편집:</span>
+                        <button onclick="applyQuickPrompt('가디건처럼 옷을 벗겨줘', true)" class="shrink-0 px-2.5 py-1 rounded-lg bg-rose-950/50 hover:bg-rose-900/50 border border-rose-500/40 text-[11px] text-rose-200 transition">
+                            🧥 가디건 벗겨줘 (픽셀)
+                        </button>
+                        <button onclick="applyQuickPrompt('들고 있는 핸드폰 없애줘', true)" class="shrink-0 px-2.5 py-1 rounded-lg bg-purple-950/50 hover:bg-purple-900/50 border border-purple-500/40 text-[11px] text-purple-200 transition">
+                            📱 들고 있는 핸드폰 없애줘
+                        </button>
+                        <button onclick="applyQuickPrompt('손 동작을 브이 포즈로 자연스럽게 바꿔줘', true)" class="shrink-0 px-2.5 py-1 rounded-lg bg-indigo-950/50 hover:bg-indigo-900/50 border border-indigo-500/40 text-[11px] text-indigo-200 transition">
+                            ✌️ 손 동작 바꿔줘
+                        </button>
                         <button onclick="applyQuickPrompt('시네마틱 레터박스 넣고 맑고 따뜻한 색감으로 선명하게 보정해줘')" class="shrink-0 px-2.5 py-1 rounded-lg bg-editor-card hover:bg-gray-800 border border-editor-border text-[11px] text-gray-300 transition">
                             🎬 시네마틱 레터박스 + 맑은 색감
                         </button>
                         <button onclick="applyQuickPrompt('16:9 비율로 자르고 하단 중앙에 VLOG #01 자막을 세련되게 추가해줘')" class="shrink-0 px-2.5 py-1 rounded-lg bg-editor-card hover:bg-gray-800 border border-editor-border text-[11px] text-gray-300 transition">
                             📺 16:9 크롭 + VLOG 자막
-                        </button>
-                        <button onclick="applyQuickPrompt('흑백 빈티지 감성으로 바꾸고 좌우 반전해줘')" class="shrink-0 px-2.5 py-1 rounded-lg bg-editor-card hover:bg-gray-800 border border-editor-border text-[11px] text-gray-300 transition">
-                            🎞️ 흑백 빈티지 + 좌우 반전
-                        </button>
-                        <button onclick="applyQuickPrompt('폴라로이드 흰색 테두리 액자 씌우고 벚꽃 스티커랑 햇살 효과 추가해줘')" class="shrink-0 px-2.5 py-1 rounded-lg bg-editor-card hover:bg-gray-800 border border-editor-border text-[11px] text-gray-300 transition">
-                            🌸 폴라로이드 + 벚꽃·햇살
-                        </button>
-                        <button onclick="applyQuickPrompt('눈 내리는 겨울 밤 분위기로 차갑고 몽환적으로 바꿔줘')" class="shrink-0 px-2.5 py-1 rounded-lg bg-editor-card hover:bg-gray-800 border border-editor-border text-[11px] text-gray-300 transition">
-                            ❄️ 눈 내리는 겨울 감성
                         </button>
                         <button onclick="applyQuickPrompt('배경을 붉은 노을이 지는 아름다운 바다 풍경으로 바꿔줘', true)" class="shrink-0 px-2.5 py-1 rounded-lg bg-purple-950/50 hover:bg-purple-900/50 border border-purple-500/40 text-[11px] text-purple-300 transition">
                             🌅 AI 배경 교체 (노을 바다)
@@ -269,12 +269,34 @@
                     </div>
 
                     <!-- AI 처리 중 오버레이 -->
-                    <div id="aiLoadingOverlay" class="hidden absolute inset-0 bg-editor-bg/80 backdrop-blur-sm flex flex-col items-center justify-center z-30 p-6 text-center">
+                    <div id="aiLoadingOverlay" class="hidden absolute inset-0 bg-editor-bg/85 backdrop-blur-sm flex flex-col items-center justify-center z-30 p-6 text-center">
                         <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/30 ai-thinking mb-4">
                             <i class="fa-solid fa-wand-magic-sparkles text-white text-xl"></i>
                         </div>
-                        <p id="aiLoadingTitle" class="text-sm font-bold text-white mb-1">AI가 명령어를 분석하고 있습니다...</p>
-                        <p id="aiLoadingDesc" class="text-xs text-gray-400 max-w-xs">색감, 조명, 구도 및 자막 스타일을 실시간으로 계산 중입니다.</p>
+                        <p id="aiLoadingTitle" class="text-sm font-bold text-white mb-1">AI 생성형 픽셀 편집 엔진으로 직접 전송 중...</p>
+                        <p id="aiLoadingDesc" class="text-xs text-gray-400 max-w-sm">현재 이미지 픽셀을 기반으로 직접 다시 그리고 있습니다.</p>
+                    </div>
+
+                    <!-- 픽셀 편집 실패 원인 안내 및 즉시 재시도 패널 -->
+                    <div id="aiErrorPanel" class="hidden absolute inset-0 bg-editor-bg/92 backdrop-blur-md flex flex-col items-center justify-center z-30 p-6 text-center">
+                        <div class="w-12 h-12 rounded-2xl bg-red-500/15 border border-red-500/40 flex items-center justify-center text-red-400 mb-3">
+                            <i class="fa-solid fa-triangle-exclamation text-lg"></i>
+                        </div>
+                        <h4 class="text-sm font-bold text-white mb-1">AI 픽셀 편집을 완료하지 못했습니다</h4>
+                        <p id="aiErrorReason" class="text-xs text-red-300 bg-red-950/50 border border-red-500/30 rounded-xl px-3.5 py-2.5 max-w-md mb-2 leading-relaxed">
+                            모델 응답에서 이미지 데이터를 받지 못했습니다.
+                        </p>
+                        <p class="text-[11px] text-gray-400 max-w-md mb-4">
+                            화면 밝기나 자막으로 임의 대체하지 않았습니다. 표현을 다듬거나 즉시 재시도해보세요.
+                        </p>
+                        <div class="flex items-center gap-2">
+                            <button onclick="retryLastPixelEdit()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-lg transition flex items-center gap-1.5 cursor-pointer">
+                                <i class="fa-solid fa-rotate-right"></i> 즉시 재시도
+                            </button>
+                            <button onclick="dismissPixelError()" class="px-4 py-2 rounded-xl bg-editor-card hover:bg-gray-800 border border-editor-border text-gray-300 text-xs font-medium transition cursor-pointer">
+                                닫기
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -284,6 +306,12 @@
                 <!-- 샘플 이미지 선택 -->
                 <div class="flex items-center gap-2 overflow-x-auto">
                     <span class="text-xs text-gray-400 font-medium shrink-0"><i class="fa-regular fa-images mr-1 text-blue-400"></i>샘플:</span>
+                    <button onclick="loadSampleImage('cardigan')" class="px-2.5 py-1 rounded-lg bg-editor-card hover:bg-gray-800 border border-editor-border text-xs text-gray-200 transition shrink-0">
+                        🧥 가디건 걸친 인물
+                    </button>
+                    <button onclick="loadSampleImage('phone_person')" class="px-2.5 py-1 rounded-lg bg-editor-card hover:bg-gray-800 border border-editor-border text-xs text-gray-200 transition shrink-0">
+                        📱 핸드폰 든 인물
+                    </button>
                     <button onclick="loadSampleImage('mountain')" class="px-2.5 py-1 rounded-lg bg-editor-card hover:bg-gray-800 border border-editor-border text-xs text-gray-300 transition shrink-0">
                         🏔️ 산책로 풍경
                     </button>
@@ -292,9 +320,6 @@
                     </button>
                     <button onclick="loadSampleImage('cafe')" class="px-2.5 py-1 rounded-lg bg-editor-card hover:bg-gray-800 border border-editor-border text-xs text-gray-300 transition shrink-0">
                         ☕ 감성 카페
-                    </button>
-                    <button onclick="loadSampleImage('portrait')" class="px-2.5 py-1 rounded-lg bg-editor-card hover:bg-gray-800 border border-editor-border text-xs text-gray-300 transition shrink-0">
-                        👤 인물 스냅
                     </button>
                 </div>
 
@@ -660,7 +685,9 @@
         // ==========================================
         const apiKey = ""; // 런타임 자동 주입
         const TEXT_MODEL = "gemini-2.5-flash";
-        const IMAGE_MODEL = "gemini-2.5-flash-image";
+        const IMAGE_MODELS = ["gemini-2.5-flash-image", "gemini-3.1-flash-image-preview"];
+
+        let lastFailedPixelRequest = null;
 
         const canvas = document.getElementById('editorCanvas');
         const ctx = canvas.getContext('2d');
@@ -735,119 +762,119 @@
             tempCanvas.height = 750;
             const tCtx = tempCanvas.getContext('2d');
 
-            if (type === 'mountain') {
-                // 컨셉 이미지와 유사한 산책로 & 흐린 하늘 풍경 (AI 보정 테스트에 최적)
-                const skyGrad = tCtx.createLinearGradient(0, 0, 0, 420);
-                skyGrad.addColorStop(0, '#6E7F91');
-                skyGrad.addColorStop(0.6, '#9AA8B6');
-                skyGrad.addColorStop(1, '#CBD5E1');
-                tCtx.fillStyle = skyGrad;
-                tCtx.fillRect(0, 0, 1200, 420);
+            if (type === 'cardigan') {
+                // 가디건/겉옷을 걸친 인물 테스트 샘플
+                const bgGrad = tCtx.createLinearGradient(0, 0, 1200, 750);
+                bgGrad.addColorStop(0, '#2B3548');
+                bgGrad.addColorStop(1, '#182030');
+                tCtx.fillStyle = bgGrad;
+                tCtx.fillRect(0, 0, 1200, 750);
 
-                // 구름 낀 하늘 디테일
-                tCtx.fillStyle = 'rgba(255, 255, 255, 0.22)';
-                for (let i = 0; i < 8; i++) {
-                    tCtx.beginPath();
-                    tCtx.ellipse(150 + i * 140, 110 + (i % 3) * 35, 130, 45, 0, 0, Math.PI * 2);
-                    tCtx.fill();
-                }
+                // 부드러운 실내 조명
+                const lampGrad = tCtx.createRadialGradient(600, 220, 30, 600, 260, 480);
+                lampGrad.addColorStop(0, 'rgba(255, 232, 190, 0.28)');
+                lampGrad.addColorStop(1, 'rgba(24, 32, 48, 0)');
+                tCtx.fillStyle = lampGrad;
+                tCtx.fillRect(0, 0, 1200, 750);
 
-                // 원경 산맥
-                tCtx.fillStyle = '#4B5E6B';
+                // 인물 머리 & 목 & 이너 티셔츠
+                tCtx.fillStyle = '#E6B89C';
                 tCtx.beginPath();
-                tCtx.moveTo(0, 420);
-                tCtx.lineTo(0, 260);
-                tCtx.lineTo(240, 170);
-                tCtx.lineTo(520, 290);
-                tCtx.lineTo(820, 150);
-                tCtx.lineTo(1200, 270);
-                tCtx.lineTo(1200, 420);
+                tCtx.arc(600, 235, 78, 0, Math.PI * 2);
+                tCtx.fill();
+
+                // 헤어
+                tCtx.fillStyle = '#1E2430';
+                tCtx.beginPath();
+                tCtx.arc(600, 222, 84, Math.PI * 0.95, Math.PI * 2.05);
+                tCtx.fill();
+
+                // 목 & 이너 흰색 크루넥 상의
+                tCtx.fillStyle = '#E6B89C';
+                tCtx.fillRect(574, 302, 52, 42);
+                tCtx.fillStyle = '#F8FAFC';
+                tCtx.beginPath();
+                tCtx.ellipse(600, 560, 145, 220, 0, Math.PI, Math.PI * 2);
+                tCtx.fill();
+
+                // 양쪽에 걸친 니트 가디건 겉옷 (테라코타/브라운 컬러)
+                tCtx.fillStyle = '#A8583B';
+                tCtx.beginPath();
+                tCtx.moveTo(465, 345);
+                tCtx.lineTo(545, 345);
+                tCtx.lineTo(525, 750);
+                tCtx.lineTo(410, 750);
                 tCtx.closePath();
                 tCtx.fill();
 
-                // 근경 녹음 & 초원
-                const grassGrad = tCtx.createLinearGradient(0, 380, 0, 750);
-                grassGrad.addColorStop(0, '#4A634D');
-                grassGrad.addColorStop(1, '#2D3E30');
-                tCtx.fillStyle = grassGrad;
-                tCtx.fillRect(0, 380, 1200, 370);
-
-                // 나무 데크 산책로
-                tCtx.fillStyle = '#7C5E46';
                 tCtx.beginPath();
-                tCtx.moveTo(480, 750);
-                tCtx.lineTo(660, 410);
-                tCtx.lineTo(710, 410);
-                tCtx.lineTo(860, 750);
+                tCtx.moveTo(655, 345);
+                tCtx.lineTo(735, 345);
+                tCtx.lineTo(790, 750);
+                tCtx.lineTo(675, 750);
                 tCtx.closePath();
                 tCtx.fill();
 
-                // 산책로 난간
-                tCtx.strokeStyle = '#5A4230';
-                tCtx.lineWidth = 6;
+                // 가디건 소매 & 손
+                tCtx.fillStyle = '#964B30';
                 tCtx.beginPath();
-                tCtx.moveTo(475, 720);
-                tCtx.lineTo(658, 395);
-                tCtx.moveTo(865, 720);
-                tCtx.lineTo(712, 395);
+                tCtx.ellipse(425, 535, 48, 125, 0.22, 0, Math.PI * 2);
+                tCtx.fill();
+                tCtx.beginPath();
+                tCtx.ellipse(775, 535, 48, 125, -0.22, 0, Math.PI * 2);
+                tCtx.fill();
+
+                tCtx.fillStyle = '#E6B89C';
+                tCtx.beginPath();
+                tCtx.arc(402, 650, 26, 0, Math.PI * 2);
+                tCtx.arc(798, 650, 26, 0, Math.PI * 2);
+                tCtx.fill();
+            } else if (type === 'phone_person') {
+                // 손에 핸드폰을 들고 있는 인물 테스트 샘플
+                const bgGrad = tCtx.createLinearGradient(0, 0, 1200, 750);
+                bgGrad.addColorStop(0, '#1E293B');
+                bgGrad.addColorStop(1, '#0F172A');
+                tCtx.fillStyle = bgGrad;
+                tCtx.fillRect(0, 0, 1200, 750);
+
+                tCtx.fillStyle = '#E5B99E';
+                tCtx.beginPath();
+                tCtx.arc(600, 240, 76, 0, Math.PI * 2);
+                tCtx.fill();
+
+                tCtx.fillStyle = '#111827';
+                tCtx.beginPath();
+                tCtx.arc(600, 228, 82, Math.PI, Math.PI * 2);
+                tCtx.fill();
+
+                // 상의
+                tCtx.fillStyle = '#334155';
+                tCtx.beginPath();
+                tCtx.ellipse(600, 575, 175, 210, 0, Math.PI, Math.PI * 2);
+                tCtx.fill();
+
+                // 오른손이 스마트폰을 들고 있는 모습
+                tCtx.strokeStyle = '#334155';
+                tCtx.lineWidth = 54;
+                tCtx.lineCap = 'round';
+                tCtx.beginPath();
+                tCtx.moveTo(720, 445);
+                tCtx.lineTo(685, 535);
                 tCtx.stroke();
 
-                // 우측 나무 실루엣
-                tCtx.fillStyle = '#384D3B';
-                for (let i = 0; i < 6; i++) {
-                    tCtx.beginPath();
-                    tCtx.arc(920 + (i % 2) * 110, 230 + i * 45, 95, 0, Math.PI * 2);
-                    tCtx.fill();
-                }
-            } else if (type === 'city') {
-                // 도심 야경
-                const nightGrad = tCtx.createLinearGradient(0, 0, 0, 750);
-                nightGrad.addColorStop(0, '#090D16');
-                nightGrad.addColorStop(0.65, '#17233B');
-                nightGrad.addColorStop(1, '#0B111E');
-                tCtx.fillStyle = nightGrad;
-                tCtx.fillRect(0, 0, 1200, 750);
+                // 스마트폰 본체 & 화면
+                tCtx.fillStyle = '#090D16';
+                roundRect(tCtx, 635, 480, 76, 136, 12);
+                tCtx.fill();
+                tCtx.fillStyle = '#38BDF8';
+                tCtx.fillRect(642, 490, 62, 114);
 
-                // 별빛
-                tCtx.fillStyle = 'rgba(255,255,255,0.6)';
-                for (let i = 0; i < 60; i++) {
-                    tCtx.fillRect((i * 197) % 1200, (i * 89) % 300, 2, 2);
-                }
-
-                // 빌딩 스카이라인
-                const buildings = [
-                    {x: 60, y: 260, w: 140, h: 490, c: '#111827'},
-                    {x: 220, y: 180, w: 170, h: 570, c: '#1E293B'},
-                    {x: 420, y: 120, w: 150, h: 630, c: '#0F172A'},
-                    {x: 600, y: 210, w: 190, h: 540, c: '#1E293B'},
-                    {x: 820, y: 150, w: 160, h: 600, c: '#111827'},
-                    {x: 1000, y: 240, w: 150, h: 510, c: '#1F2937'}
-                ];
-                buildings.forEach(b => {
-                    tCtx.fillStyle = b.c;
-                    tCtx.fillRect(b.x, b.y, b.w, b.h);
-                    // 창문 불빛
-                    for (let wy = b.y + 25; wy < 700; wy += 32) {
-                        for (let wx = b.x + 18; wx < b.x + b.w - 20; wx += 26) {
-                            if ((wx + wy) % 3 !== 0) {
-                                tCtx.fillStyle = (wx * wy) % 5 === 0 ? '#60A5FA' : '#FBBF24';
-                                tCtx.fillRect(wx, wy, 10, 16);
-                            }
-                        }
-                    }
-                });
-            } else if (type === 'cafe') {
-                // 따뜻한 감성 카페 테이블
-                tCtx.fillStyle = '#2C221E';
-                tCtx.fillRect(0, 0, 1200, 750);
-
-                // 창가 빛
-                const lightGrad = tCtx.createRadialGradient(300, 180, 40, 300, 180, 520);
-                lightGrad.addColorStop(0, 'rgba(253, 224, 171, 0.45)');
-                lightGrad.addColorStop(1, 'rgba(44, 34, 30, 0)');
-                tCtx.fillStyle = lightGrad;
-                tCtx.fillRect(0, 0, 1200, 750);
-
+                // 손가락 디테일
+                tCtx.fillStyle = '#E5B99E';
+                tCtx.beginPath();
+                tCtx.arc(672, 548, 26, 0, Math.PI * 2);
+                tCtx.fill();
+            } else if (type === 'mountain') {
                 // 원목 테이블
                 tCtx.fillStyle = '#5C3D2E';
                 tCtx.fillRect(0, 430, 1200, 320);
@@ -980,359 +1007,115 @@
         }
 
         // ==========================================
-        // 3. 실시간 캔버스 렌더링 엔진 (크롭, 회전, 반전, 필터, 날씨, 프레임, 다중 레이어)
-        // ==========================================
-        function computeCanvasDimensions() {
-            const rot = ((currentState.transform.rotation % 360) + 360) % 360;
-            const isSwapped = rot === 90 || rot === 270;
-            let srcW = isSwapped ? baseImage.height : baseImage.width;
-            let srcH = isSwapped ? baseImage.width : baseImage.height;
-
-            const ratio = currentState.transform.aspectRatio;
-            if (ratio === '1:1') {
-                const s = Math.min(srcW, srcH);
-                return { w: s, h: s };
-            } else if (ratio === '16:9') {
-                const targetH = Math.round(srcW * 9 / 16);
-                if (targetH <= srcH) return { w: srcW, h: targetH };
-                return { w: Math.round(srcH * 16 / 9), h: srcH };
-            } else if (ratio === '9:16') {
-                const targetW = Math.round(srcH * 9 / 16);
-                if (targetW <= srcW) return { w: targetW, h: srcH };
-                return { w: srcW, h: Math.round(srcW * 16 / 9) };
-            } else if (ratio === '4:3') {
-                const targetH = Math.round(srcW * 3 / 4);
-                if (targetH <= srcH) return { w: srcW, h: targetH };
-                return { w: Math.round(srcH * 4 / 3), h: srcH };
-            }
-            return { w: srcW, h: srcH };
-        }
-
-        function renderCanvas() {
-            if (!baseImage || !baseImage.complete || baseImage.naturalWidth === 0) return;
-
-            // 원본 비교 모드일 경우 원본 크기 및 원본 픽셀만 표시
-            if (isComparingOriginal) {
-                canvas.width = baseImage.width;
-                canvas.height = baseImage.height;
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.filter = 'none';
-                ctx.drawImage(baseImage, 0, 0);
-                return;
-            }
-
-            const { w, h } = computeCanvasDimensions();
-            if (canvas.width !== w || canvas.height !== h) {
-                canvas.width = w;
-                canvas.height = h;
-            }
-            document.getElementById('canvasInfo').textContent = `${w} × ${h} px`;
-            ctx.clearRect(0, 0, w, h);
-
-            const f = currentState.filters;
-            const tr = currentState.transform;
-
-            // 1) 베이스 이미지 변형(회전, 좌우/상하 반전, 줌, 비율 크롭) + CSS 필터 렌더링
-            ctx.save();
-            ctx.filter = `brightness(${f.brightness}%) contrast(${f.contrast}%) saturate(${f.saturate}%) sepia(${f.sepia}%) grayscale(${f.grayscale}%) invert(${f.invert}%) blur(${f.blur}px)`;
-            
-            ctx.translate(w / 2, h / 2);
-            ctx.rotate((tr.rotation * Math.PI) / 180);
-            ctx.scale((tr.flipH ? -1 : 1) * (tr.zoom / 100), (tr.flipV ? -1 : 1) * (tr.zoom / 100));
-
-            // 비율 크롭 시 캔버스를 빈틈없이 채우도록 cover 스케일 계산
-            const rot = ((tr.rotation % 360) + 360) % 360;
-            const isSwapped = rot === 90 || rot === 270;
-            const effW = isSwapped ? baseImage.height : baseImage.width;
-            const effH = isSwapped ? baseImage.width : baseImage.height;
-            const coverScale = Math.max(w / effW, h / effH);
-
-            ctx.drawImage(
-                baseImage,
-                (-baseImage.width * coverScale) / 2,
-                (-baseImage.height * coverScale) / 2,
-                baseImage.width * coverScale,
-                baseImage.height * coverScale
-            );
-            ctx.restore();
-
-            // 2) 색온도 (Warmth)
-            if (f.warmth !== 0) {
-                ctx.save();
-                if (f.warmth > 0) {
-                    ctx.fillStyle = `rgba(255, 145, 50, ${(f.warmth / 50) * 0.25})`;
-                } else {
-                    ctx.fillStyle = `rgba(56, 152, 255, ${(Math.abs(f.warmth) / 50) * 0.26})`;
-                }
-                ctx.globalCompositeOperation = 'soft-light';
-                ctx.fillRect(0, 0, w, h);
-                ctx.restore();
-            }
-
-            // 3) 비네팅 (Vignette)
-            if (f.vignette > 0) {
-                ctx.save();
-                const radius = Math.max(w, h) * 0.72;
-                const grad = ctx.createRadialGradient(w / 2, h / 2, radius * 0.35, w / 2, h / 2, radius);
-                grad.addColorStop(0, 'rgba(0,0,0,0)');
-                grad.addColorStop(1, `rgba(0,0,0,${(f.vignette / 100) * 0.85})`);
-                ctx.fillStyle = grad;
-                ctx.fillRect(0, 0, w, h);
-                ctx.restore();
-            }
-
-            // 4) 분위기 / 날씨 효과 오버레이
-            renderWeatherOverlay(ctx, w, h, currentState.overlays.weather);
-
-            // 5) 프레임 / 시네마틱 레터박스
-            renderFrameOverlay(ctx, w, h, currentState.overlays.frame);
-
-            // 6) 다중 자막 및 스티커 레이어 렌더링
-            renderedLayerBounds = [];
-            const dragHint = document.getElementById('dragHintBadge');
-            if (currentState.layers.length > 0) {
-                dragHint.classList.remove('hidden');
-                currentState.layers.forEach(layer => {
-                    const bounds = renderSingleLayer(ctx, w, h, layer, layer.id === selectedLayerId);
-                    renderedLayerBounds.push({ id: layer.id, ...bounds });
-                });
-            } else {
-                dragHint.classList.add('hidden');
-            }
-        }
-
-        function renderWeatherOverlay(ctx, w, h, weather) {
-            if (!weather || weather === 'none') return;
-            ctx.save();
-            if (weather === 'sunflare') {
-                const flareGrad = ctx.createRadialGradient(w * 0.18, h * 0.15, 10, w * 0.18, h * 0.15, Math.max(w, h) * 0.65);
-                flareGrad.addColorStop(0, 'rgba(255, 250, 220, 0.72)');
-                flareGrad.addColorStop(0.25, 'rgba(255, 200, 110, 0.35)');
-                flareGrad.addColorStop(0.6, 'rgba(255, 160, 70, 0.12)');
-                flareGrad.addColorStop(1, 'rgba(255, 160, 70, 0)');
-                ctx.globalCompositeOperation = 'screen';
-                ctx.fillStyle = flareGrad;
-                ctx.fillRect(0, 0, w, h);
-            } else if (weather === 'snow') {
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-                weatherParticles.forEach(p => {
-                    ctx.beginPath();
-                    ctx.arc(p.rx * w, p.ry * h, p.size * (w / 220), 0, Math.PI * 2);
-                    ctx.fill();
-                });
-            } else if (weather === 'rain') {
-                ctx.strokeStyle = 'rgba(200, 225, 255, 0.45)';
-                ctx.lineWidth = Math.max(1.2, w / 650);
-                weatherParticles.forEach(p => {
-                    const x = p.rx * w;
-                    const y = p.ry * h;
-                    const len = p.size * (h / 24);
-                    ctx.beginPath();
-                    ctx.moveTo(x, y);
-                    ctx.lineTo(x - len * 0.22, y + len);
-                    ctx.stroke();
-                });
-            } else if (weather === 'sakura') {
-                weatherParticles.slice(0, 45).forEach(p => {
-                    ctx.save();
-                    ctx.translate(p.rx * w, p.ry * h);
-                    ctx.rotate(p.angle * 3);
-                    ctx.fillStyle = 'rgba(255, 183, 206, 0.85)';
-                    ctx.beginPath();
-                    ctx.ellipse(0, 0, p.size * (w / 130), p.size * (w / 240), 0, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.restore();
-                });
-            }
-            ctx.restore();
-        }
-
-        function renderFrameOverlay(ctx, w, h, frame) {
-            if (!frame || frame === 'none') return;
-            ctx.save();
-            if (frame === 'letterbox') {
-                const barH = Math.round(h * 0.115);
-                ctx.fillStyle = '#050608';
-                ctx.fillRect(0, 0, w, barH);
-                ctx.fillRect(0, h - barH, w, barH);
-            } else if (frame === 'polaroid') {
-                const side = Math.round(Math.min(w, h) * 0.045);
-                const bottom = Math.round(h * 0.15);
-                ctx.fillStyle = '#F8FAFC';
-                ctx.fillRect(0, 0, w, side); // 상단
-                ctx.fillRect(0, h - bottom, w, bottom); // 하단 넓은 여백
-                ctx.fillRect(0, 0, side, h); // 좌측
-                ctx.fillRect(w - side, 0, side, h); // 우측
-                ctx.strokeStyle = 'rgba(0,0,0,0.12)';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(side, side, w - side * 2, h - side - bottom);
-            } else if (frame === 'white-border') {
-                const border = Math.round(Math.min(w, h) * 0.035);
-                ctx.strokeStyle = '#FFFFFF';
-                ctx.lineWidth = border * 2;
-                ctx.strokeRect(0, 0, w, h);
-            }
-            ctx.restore();
-        }
-
-        function renderSingleLayer(ctx, w, h, layer, isSelected) {
-            ctx.save();
-            const scaleFactor = Math.max(0.65, w / 1000);
-            const cx = layer.xNorm * w;
-            const cy = layer.yNorm * h;
-
-            if (layer.type === 'sticker') {
-                const fontSize = Math.round(layer.size * scaleFactor * 1.4);
-                ctx.font = `${fontSize}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.shadowColor = 'rgba(0,0,0,0.35)';
-                ctx.shadowBlur = 10 * scaleFactor;
-                ctx.fillText(layer.text, cx, cy);
-
-                const boxW = fontSize * 1.25;
-                const boxH = fontSize * 1.25;
-                const bx = cx - boxW / 2;
-                const by = cy - boxH / 2;
-
-                if (isSelected) {
-                    ctx.strokeStyle = '#3B82F6';
-                    ctx.lineWidth = 2;
-                    ctx.setLineDash([5, 4]);
-                    ctx.strokeRect(bx, by, boxW, boxH);
-                }
-                ctx.restore();
-                return { x: bx, y: by, w: boxW, h: boxH };
-            } else {
-                let fontStack = '"Noto Sans KR", "Inter", sans-serif';
-                if (layer.fontFamily === 'serif') fontStack = '"Noto Serif KR", Georgia, serif';
-                if (layer.fontFamily === 'mono') fontStack = 'ui-monospace, SFMono-Regular, Menlo, monospace';
-
-                const actualFontSize = Math.round(layer.size * scaleFactor);
-                ctx.font = `700 ${actualFontSize}px ${fontStack}`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-
-                const metrics = ctx.measureText(layer.text);
-                const textWidth = metrics.width;
-                const textHeight = actualFontSize * 1.35;
-                const padX = actualFontSize * 0.65;
-                const padY = actualFontSize * 0.35;
-
-                const boxW = textWidth + padX * 2;
-                const boxH = textHeight + padY;
-                const bx = cx - boxW / 2;
-                const by = cy - boxH / 2;
-
-                if (layer.hasBg) {
-                    ctx.fillStyle = 'rgba(11, 14, 20, 0.72)';
-                    roundRect(ctx, bx, by, boxW, boxH, 12 * scaleFactor);
-                    ctx.fill();
-                }
-
-                ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
-                ctx.shadowBlur = 8 * scaleFactor;
-                ctx.shadowOffsetY = 2 * scaleFactor;
-                ctx.fillStyle = layer.color || '#FFFFFF';
-                ctx.fillText(layer.text, cx, cy);
-
-                if (isSelected) {
-                    ctx.shadowBlur = 0;
-                    ctx.shadowOffsetY = 0;
-                    ctx.strokeStyle = '#60A5FA';
-                    ctx.lineWidth = 2;
-                    ctx.setLineDash([5, 4]);
-                    ctx.strokeRect(bx - 3, by - 3, boxW + 6, boxH + 6);
-                }
-
-                ctx.restore();
-                return { x: bx, y: by, w: boxW, h: boxH };
-            }
-        }
-
-        // 캔버스 위 마우스/터치로 자막 및 스티커 직접 드래그 이동
-        function setupCanvasInteractions() {
-            const getCanvasPos = (e) => {
-                const rect = canvas.getBoundingClientRect();
-                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                return {
-                    x: ((clientX - rect.left) / rect.width) * canvas.width,
-                    y: ((clientY - rect.top) / rect.height) * canvas.height
-                };
-            };
-
-            const onPointerDown = (e) => {
-                if (renderedLayerBounds.length === 0) return;
-                const pos = getCanvasPos(e);
-                // 위에서부터(역순) 히트 체크
-                for (let i = renderedLayerBounds.length - 1; i >= 0; i--) {
-                    const b = renderedLayerBounds[i];
-                    if (pos.x >= b.x && pos.x <= b.x + b.w && pos.y >= b.y && pos.y <= b.y + b.h) {
-                        selectedLayerId = b.id;
-                        const layer = currentState.layers.find(l => l.id === b.id);
-                        if (layer) {
-                            isDraggingLayer = true;
-                            dragOffsetX = pos.x - layer.xNorm * canvas.width;
-                            dragOffsetY = pos.y - layer.yNorm * canvas.height;
-                            canvas.style.cursor = 'grabbing';
-                            syncUIWithState();
-                            renderCanvas();
-                        }
-                        return;
-                    }
-                }
-            };
-
-            const onPointerMove = (e) => {
-                if (!isDraggingLayer || !selectedLayerId) return;
-                if (e.cancelable) e.preventDefault();
-                const pos = getCanvasPos(e);
-                const layer = currentState.layers.find(l => l.id === selectedLayerId);
-                if (layer) {
-                    layer.xNorm = clamp((pos.x - dragOffsetX) / canvas.width, 0.05, 0.95);
-                    layer.yNorm = clamp((pos.y - dragOffsetY) / canvas.height, 0.05, 0.95);
-                    renderCanvas();
-                }
-            };
-
-            const onPointerUp = () => {
-                if (isDraggingLayer) {
-                    isDraggingLayer = false;
-                    canvas.style.cursor = 'default';
-                    commitHistory("레이어 위치 드래그 이동");
-                }
-            };
-
-            canvas.addEventListener('mousedown', onPointerDown);
-            window.addEventListener('mousemove', onPointerMove);
-            window.addEventListener('mouseup', onPointerUp);
-
-            canvas.addEventListener('touchstart', onPointerDown, { passive: false });
-            window.addEventListener('touchmove', onPointerMove, { passive: false });
-            window.addEventListener('touchend', onPointerUp);
-        }
-
-        function roundRect(ctx, x, y, width, height, radius) {
-            ctx.beginPath();
-            ctx.moveTo(x + radius, y);
-            ctx.lineTo(x + width - radius, y);
-            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-            ctx.lineTo(x + width, y + height - radius);
-            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-            ctx.lineTo(x + radius, y + height);
-            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-            ctx.lineTo(x, y + radius);
-            ctx.quadraticCurveTo(x, y, x + radius, y);
-            ctx.closePath();
-        }
-
-        // ==========================================
-        // 4. Zero-Failure 하이브리드 AI 엔진 (Gemini API + 내장 한국어 자연어 파서)
+        // 4. Fast-Track 픽셀 편집 라우터 + Zero-Failure AI 엔진
         // ==========================================
         function applyQuickPrompt(promptText, forceGenerative = false) {
             document.getElementById('commandInput').value = promptText;
             executeAICommand(forceGenerative);
+        }
+
+        /**
+         * 의상 탈의/교체, 소품 제거, 손 동작/포즈, 배경/장면 변경 여부를 즉시 판별하여
+         * 느린 텍스트 파서나 로컬 필터 우회를 완전히 차단하고 픽셀 생성 파이프라인으로 직행시킵니다.
+         */
+        function shouldRunDirectPixelEdit(userCommand, forceGenerative = false) {
+            if (forceGenerative) return true;
+            const pixelEditPattern = /(가디건|겉옷|자켓|재킷|코트|패딩|니트|상의|하의|바지|치마|원피스|옷|의상|착장|모자|안경|선글라스|귀걸이|목걸이|가방|핸드폰|스마트폰|폰|소품|물건|사물|손\s*동작|손동작|손가락|포즈|자세|표정|얼굴|헤어|머리|배경|풍경|바다|산|하늘|밤거리|한강|벗겨|벗기|탈의|없애|지워|삭제|제거|빼줘|바꿔줘|교체|합성)/i;
+            return pixelEditPattern.test(userCommand);
+        }
+
+        function dismissPixelError() {
+            document.getElementById('aiErrorPanel').classList.add('hidden');
+            lastFailedPixelRequest = null;
+        }
+
+        async function retryLastPixelEdit() {
+            if (!lastFailedPixelRequest) return;
+            const { command, prompt } = lastFailedPixelRequest;
+            dismissPixelError();
+            await runDirectPixelEditingPipeline(command, prompt);
+        }
+
+        function buildDirectPixelPrompt(userCommand) {
+            const lower = userCommand.toLowerCase();
+            if (/(가디건|겉옷|자켓|재킷|코트|패딩|니트|옷|의상)/.test(userCommand) && /(벗겨|벗기|탈의|없애|지워|제거|빼)/.test(userCommand)) {
+                return `Edit this photo naturally to remove the outer cardigan/outerwear/jacket while keeping the person's identity, face, hair, body proportions, skin tone, lighting, and background consistent. Where the outer cardigan/layer is removed, render a natural, neat, everyday inner top/shirt or clean shoulder/arm appearance that fits the scene seamlessly without nudity or inappropriate content. User instruction: ${userCommand}`;
+            }
+            if (/(핸드폰|스마트폰|폰)/.test(userCommand) && /(없애|지워|삭제|제거|빼)/.test(userCommand)) {
+                return `Edit this photo naturally to cleanly remove the smartphone/phone being held by the person, reconstructing the hand, fingers, clothing, and background behind it naturally and seamlessly. User instruction: ${userCommand}`;
+            }
+            if (/(손\s*동작|손동작|손가락|포즈|자세)/.test(userCommand)) {
+                return `Edit this photo naturally so the person's hand gesture/pose matches the requested action while preserving the person's face, identity, clothing, lighting, and overall composition. User instruction: ${userCommand}`;
+            }
+            return `Edit the pixels of this image directly and naturally according to the user's instruction while preserving key subject consistency and photorealistic quality. User instruction: ${userCommand}`;
+        }
+
+        /**
+         * 생성형 픽셀 편집 전용 파이프라인 (필터/밝기/자막 우회 절대 금지, 실패 시 원인 안내 및 재시도)
+         */
+        async function runDirectPixelEditingPipeline(userCommand, customPrompt = null) {
+            const promptToSend = customPrompt || buildDirectPixelPrompt(userCommand);
+            lastFailedPixelRequest = { command: userCommand, prompt: promptToSend };
+            dismissPixelError();
+            setLoading(true, "AI 생성형 픽셀 편집 엔진으로 직접 전송 중...", `"${userCommand}"`);
+
+            try {
+                const editedDataUrl = await editImageWithGemini(promptToSend);
+                if (!editedDataUrl) {
+                    throw new Error("모델 응답에 편집된 이미지 픽셀(inlineData)이 포함되지 않았습니다.");
+                }
+
+                await new Promise((resolve, reject) => {
+                    const newImg = new Image();
+                    newImg.onload = () => {
+                        baseImage = newImg;
+                        currentState.imageSrc = editedDataUrl;
+                        // 픽셀 재생성 시 기존 구도/비율/필터와 충돌하지 않도록 베이스 동기화
+                        currentState.transform.aspectRatio = "original";
+                        currentState.transform.rotation = 0;
+                        currentState.transform.flipH = false;
+                        currentState.transform.flipV = false;
+                        currentState.transform.zoom = 100;
+                        resolve();
+                    };
+                    newImg.onerror = () => reject(new Error("반환된 이미지 픽셀을 캔버스에 디코딩하는 데 실패했습니다."));
+                    newImg.src = editedDataUrl;
+                });
+
+                currentState.aiLayers = [{
+                    name: "AI 직접 픽셀 생성 완료",
+                    detail: userCommand,
+                    active: true
+                }];
+                lastFailedPixelRequest = null;
+
+                syncUIWithState();
+                renderCanvas();
+                commitHistory(`AI 픽셀 편집: ${userCommand}`);
+                document.getElementById('commandInput').value = "";
+                showToast("이미지 픽셀이 직접 편집되었습니다!", "success");
+            } catch (err) {
+                console.error("Direct Pixel Edit Failed:", err);
+                const reasonText = interpretPixelEditError(err);
+                document.getElementById('aiErrorReason').textContent = reasonText;
+                document.getElementById('aiErrorPanel').classList.remove('hidden');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        function interpretPixelEditError(err) {
+            const msg = String(err?.message || err || "");
+            if (/SAFETY|PROHIBITED_CONTENT|BLOCKED|안전|차단/i.test(msg)) {
+                return `안전 정책 필터에 의해 이미지 픽셀 재생성이 차단되었습니다. (${msg}) 다른 표현이나 다른 샘플 이미지로 다시 시도해보세요.`;
+            }
+            if (/429|quota|RESOURCE_EXHAUSTED|한도/i.test(msg)) {
+                return `API 요청 한도(Quota) 또는 동시 처리 제한에 도달했습니다. 잠시 후 [즉시 재시도]를 눌러주세요.`;
+            }
+            if (/401|403|API key|PERMISSION_DENIED|권한/i.test(msg)) {
+                return `이미지 편집 모델 호출 권한 또는 API 키 설정을 확인해주세요. (${msg})`;
+            }
+            return `${msg || "알 수 없는 이유로 픽셀 생성에 실패했습니다."} [즉시 재시도] 버튼으로 다시 요청할 수 있습니다.`;
         }
 
         async function executeAICommand(forceGenerative = false) {
@@ -1344,58 +1127,31 @@
                 return;
             }
 
+            // 1) 의상 탈의/제거, 소품 제거, 손 동작, 배경/장면 변경 명령은 즉시 픽셀 편집 파이프라인으로 직행
+            if (shouldRunDirectPixelEdit(userCommand, forceGenerative)) {
+                await runDirectPixelEditingPipeline(userCommand);
+                return;
+            }
+
+            // 2) 그 외 색보정·자막·비율·프레임·날씨 명령 처리
             setLoading(true, "AI가 명령어를 해석하고 있습니다...", `"${userCommand}"`);
 
             let parsedPlan = null;
-            let usedFallback = false;
 
-            // 1단계: Gemini API로 구조화된 편집 계획 시도 (실패 시 즉시 로컬 한국어 파서로 자동 전환)
             try {
-                parsedPlan = await analyzeCommandWithGemini(userCommand, forceGenerative);
+                parsedPlan = await analyzeCommandWithGemini(userCommand, false);
             } catch (apiErr) {
                 console.warn("Gemini API 파싱 대체(로컬 한국어 자연어 엔진 가동):", apiErr);
-                parsedPlan = parseKoreanCommandLocally(userCommand, forceGenerative);
-                usedFallback = true;
+                parsedPlan = parseKoreanCommandLocally(userCommand, false);
             }
 
             try {
-                // 2단계: 생성형 이미지 변형(배경 교체, 피사체 합성 등)이 필요한 경우
                 if (parsedPlan.requiresGenerativeImage) {
-                    setLoading(true, "AI가 이미지 장면을 새롭게 생성·합성 중입니다...", parsedPlan.generativePrompt || userCommand);
-                    try {
-                        const editedDataUrl = await editImageWithGemini(parsedPlan.generativePrompt || userCommand);
-                        if (editedDataUrl) {
-                            await new Promise((resolve) => {
-                                const newImg = new Image();
-                                newImg.onload = () => {
-                                    baseImage = newImg;
-                                    currentState.imageSrc = editedDataUrl;
-                                    resolve();
-                                };
-                                newImg.src = editedDataUrl;
-                            });
-                            parsedPlan.appliedEffects.unshift({
-                                name: "AI 생성형 장면 합성",
-                                detail: parsedPlan.generativePrompt || userCommand,
-                                active: true
-                            });
-                        } else {
-                            // 이미지 생성 엔드포인트 미응답 시 색감·분위기 보정으로 안전 대체
-                            const moodPatch = parseKoreanCommandLocally(userCommand, false);
-                            Object.assign(parsedPlan.filters, moodPatch.filters);
-                            if (moodPatch.overlays.weather !== 'none') parsedPlan.overlays.weather = moodPatch.overlays.weather;
-                            showToast("장면 합성은 분위기·색감 보정으로 자동 전환되어 적용되었습니다.", "info");
-                        }
-                    } catch (imgGenErr) {
-                        console.warn("생성형 이미지 합성 폴백 처리:", imgGenErr);
-                        const moodPatch = parseKoreanCommandLocally(userCommand, false);
-                        Object.assign(parsedPlan.filters, moodPatch.filters);
-                        if (moodPatch.overlays.weather !== 'none') parsedPlan.overlays.weather = moodPatch.overlays.weather;
-                        showToast("분위기 및 색감 변환 엔진으로 명령을 적용했습니다.", "info");
-                    }
+                    setLoading(false);
+                    await runDirectPixelEditingPipeline(userCommand, parsedPlan.generativePrompt || userCommand);
+                    return;
                 }
 
-                // 3단계: 전체 초기화 명령 확인
                 if (parsedPlan.resetAll) {
                     resetAllEdits();
                     inputEl.value = "";
@@ -1502,77 +1258,74 @@
         }
 
         /**
-         * Gemini API를 호출하여 사용자의 한국어 명령어를 구조화된 JSON 편집 계획으로 변환
+         * Gemini Image Editing (Image-to-Image) 호출 (다중 모델 폴백 및 상세 오류 전파)
          */
-        async function analyzeCommandWithGemini(userCommand, forceGenerative) {
-            const systemInstruction = `당신은 'Command Edit AI'의 초정밀 이미지·자막·레이아웃 편집 엔진입니다.
-사용자의 한국어 자연어 명령을 분석하여, 캔버스에 즉시 적용할 JSON 편집 계획을 생성하세요.
-
-가능한 모든 편집 기능:
-1. filters (현재 상태에서 변경할 값):
-   - brightness: 30~200 (기본 100. 밝게: 120~140, 어둡게: 70~85)
-   - contrast: 30~200 (기본 100. 선명하게/대비: 120~140, 부드럽게: 85~92)
-   - saturate: 0~220 (기본 100. 화사하게/생동감: 125~150, 흑백: 0, 차분하게: 75)
-   - warmth: -50~50 (기본 0. 따뜻하게/노을: +18~+35, 차갑게/푸르게: -18~-35)
-   - sepia: 0~100 (기본 0. 빈티지/레트로/필름: 35~65)
-   - grayscale: 0~100 (기본 0. 흑백/모노톤: 100)
-   - invert: 0~100 (기본 0. 색상반전/네거티브: 100)
-   - blur: 0~15 (기본 0. 흐리게/블러/아웃포커스: 3~8, 뽀샤시: 0.6)
-   - vignette: 0~100 (기본 0. 비네팅/시네마/테두리 어둡게: 40~65)
-2. transform:
-   - aspectRatio: 'original' | '1:1' | '16:9' | '9:16' | '4:3' (정사각형=1:1, 유튜브/와이드=16:9, 릴스/쇼츠/세로=9:16)
-   - rotationDelta: 0, 90, -90, 180 (오른쪽 회전=+90, 왼쪽 회전=-90, 뒤집기=180)
-   - flipH: boolean (좌우 반전 / 거울 모드)
-   - flipV: boolean (상하 반전)
-   - zoom: 100~200 (확대해줘=125~150, 원래크기=100)
-3. overlays:
-   - frame: 'none' | 'letterbox' | 'polaroid' | 'white-border' (시네마틱 레터박스='letterbox', 폴라로이드 액자='polaroid', 흰색 테두리='white-border')
-   - weather: 'none' | 'sunflare' | 'snow' | 'rain' | 'sakura' (햇살/빛번짐='sunflare', 눈='snow', 비='rain', 벚꽃='sakura')
-4. textAction:
-   - action: 'none' | 'add' | 'remove_all'
-   - text: 자막 내용 (따옴표 안의 문구나 요청된 텍스트를 정확히 추출)
-   - position: 'bottom-center' | 'bottom-right' | 'bottom-left' | 'center' | 'top-center' | 'top-left' | 'top-right'
-   - fontFamily: 'sans' | 'serif' | 'mono'
-   - color: HEX 색상코드 (예: '#FFFFFF', '#FDE047')
-   - fontSize: 24~72
-   - hasBg: boolean
-5. stickersToAdd: 요청된 이모지 배열 (예: ['🌸', '✨', '❤️'])
-6. requiresGenerativeImage: 사용자가 기존 이미지에 없던 새로운 객체나 완전히 다른 배경을 픽셀로 그려달라고 요청한 경우(예: "배경을 우주로 바꿔줘", "강아지 합성해줘") true. 단순 색감, 날씨 오버레이, 자막, 비율, 반전, 프레임은 false.`;
+        async function editImageWithGemini(promptText) {
+            const maxDim = 1024;
+            const scale = Math.min(1, maxDim / Math.max(baseImage.width || 1024, baseImage.height || 1024));
+            const offscreen = document.createElement('canvas');
+            offscreen.width = Math.max(1, Math.round(baseImage.width * scale));
+            offscreen.height = Math.max(1, Math.round(baseImage.height * scale));
+            offscreen.getContext('2d').drawImage(baseImage, 0, 0, offscreen.width, offscreen.height);
+            const base64Data = offscreen.toDataURL('image/jpeg', 0.92).split(',')[1];
 
             const payload = {
                 contents: [{
-                    parts: [{
-                        text: `현재 상태: ${JSON.stringify({
-                            filters: currentState.filters,
-                            transform: currentState.transform,
-                            overlays: currentState.overlays
-                        })}\n사용자 명령: "${userCommand}"${forceGenerative ? " (배경/장면 생성형 변형 포함)" : ""}`
-                    }]
+                    role: "user",
+                    parts: [
+                        { text: promptText },
+                        {
+                            inlineData: {
+                                mimeType: "image/jpeg",
+                                data: base64Data
+                            }
+                        }
+                    ]
                 }],
-                systemInstruction: {
-                    parts: [{ text: systemInstruction }]
-                },
                 generationConfig: {
-                    responseMimeType: "application/json",
-                    responseSchema: {
-                        type: "OBJECT",
-                        properties: {
-                            resetAll: { type: "BOOLEAN" },
-                            requiresGenerativeImage: { type: "BOOLEAN" },
-                            generativePrompt: { type: "STRING" },
-                            filters: {
-                                type: "OBJECT",
-                                properties: {
-                                    brightness: { type: "NUMBER" },
-                                    contrast: { type: "NUMBER" },
-                                    saturate: { type: "NUMBER" },
-                                    warmth: { type: "NUMBER" },
-                                    sepia: { type: "NUMBER" },
-                                    grayscale: { type: "NUMBER" },
-                                    invert: { type: "NUMBER" },
-                                    blur: { type: "NUMBER" },
-                                    vignette: { type: "NUMBER" }
-                                }
+                    responseModalities: ['TEXT', 'IMAGE']
+                }
+            };
+
+            let lastError = null;
+            for (const modelName of IMAGE_MODELS) {
+                try {
+                    const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+                    const response = await fetchWithRetry(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    }, 1);
+
+                    const result = await response.json();
+                    const candidate = result?.candidates?.[0];
+                    const blockReason = result?.promptFeedback?.blockReason || candidate?.finishReason;
+
+                    if (blockReason === 'SAFETY' || blockReason === 'PROHIBITED_CONTENT' || blockReason === 'IMAGE_SAFETY') {
+                        throw new Error(`SAFETY 차단 (${blockReason})`);
+                    }
+
+                    const parts = candidate?.content?.parts || [];
+                    const imgPart = parts.find(p => p.inlineData || p.inline_data);
+                    const inlineObj = imgPart?.inlineData || imgPart?.inline_data;
+
+                    if (inlineObj && inlineObj.data) {
+                        const mime = inlineObj.mimeType || inlineObj.mime_type || "image/png";
+                        return `data:${mime};base64,${inlineObj.data}`;
+                    }
+
+                    const textOnly = parts.map(p => p.text).filter(Boolean).join(" ").trim();
+                    lastError = new Error(textOnly ? `이미지가 반환되지 않았습니다: ${textOnly}` : `${modelName} 응답에 이미지 데이터가 없습니다.`);
+                } catch (err) {
+                    lastError = err;
+                    if (/SAFETY|PROHIBITED_CONTENT|IMAGE_SAFETY/i.test(String(err?.message || ""))) {
+                        throw err;
+                    }
+                }
+            }
+
+            throw lastError || new Error("이미지 편집 모델에서 유효한 이미지를 받지 못했습니다.");
+        }
                             },
                             transform: {
                                 type: "OBJECT",

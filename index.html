@@ -13,7 +13,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
+
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -36,7 +36,7 @@
                     }
                 }
             }
-        }
+        };
     </script>
     <style>
         body {
@@ -46,7 +46,6 @@
             overflow-x: hidden;
         }
 
-        /* 커스텀 스크롤바 */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -62,7 +61,6 @@
             background: #4A5568;
         }
 
-        /* 슬라이더 커스텀 */
         input[type=range] {
             -webkit-appearance: none;
             background: transparent;
@@ -89,19 +87,17 @@
             border-radius: 9999px;
         }
 
-        /* 캔버스 체커보드 배경 (투명 영역 표시용) */
         .canvas-checkerboard {
             background-color: #0F131A;
-            background-image: 
-                linear-gradient(45deg, #161B24 25%, transparent 25%), 
-                linear-gradient(-45deg, #161B24 25%, transparent 25%), 
-                linear-gradient(45deg, transparent 75%, #161B24 75%), 
+            background-image:
+                linear-gradient(45deg, #161B24 25%, transparent 25%),
+                linear-gradient(-45deg, #161B24 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #161B24 75%),
                 linear-gradient(-45deg, transparent 75%, #161B24 75%);
             background-size: 20px 20px;
             background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
         }
 
-        /* 글래스모피즘 커맨드 바 */
         .command-glow {
             box-shadow: 0 0 30px -5px rgba(59, 130, 246, 0.25), 0 10px 25px -5px rgba(0, 0, 0, 0.5);
         }
@@ -110,7 +106,6 @@
             border-color: #3B82F6;
         }
 
-        /* 로딩 스피너 애니메이션 */
         @keyframes pulse-ring {
             0% { transform: scale(0.95); opacity: 0.7; }
             50% { transform: scale(1.05); opacity: 1; }
@@ -119,6 +114,7 @@
         .ai-thinking {
             animation: pulse-ring 1.8s infinite ease-in-out;
         }
+
         .no-scrollbar::-webkit-scrollbar {
             display: none;
         }
@@ -132,7 +128,6 @@
 
     <!-- 상단 헤더 바 -->
     <header class="h-14 bg-editor-panel border-b border-editor-border px-4 flex items-center justify-between sticky top-0 z-30">
-        <!-- 브랜드 로고 -->
         <div class="flex items-center gap-3">
             <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
                 <i class="fa-solid fa-wand-magic-sparkles text-white text-sm"></i>
@@ -140,8 +135,8 @@
             <div>
                 <div class="flex items-center gap-2">
                     <span class="font-bold text-base tracking-tight text-white">Command Edit AI</span>
-                    <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> AI 엔진 준비 완료
+                    <span id="engineStatusBadge" class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> 픽셀 편집 엔진 준비 완료
                     </span>
                 </div>
             </div>
@@ -156,7 +151,7 @@
                 <i class="fa-solid fa-rotate-right"></i> 다시 실행
             </button>
             <div class="w-px h-4 bg-editor-border mx-1"></div>
-            <button id="btnCompare" 
+            <button id="btnCompare"
                 onmousedown="startCompare()" onmouseup="endCompare()" onmouseleave="endCompare()"
                 ontouchstart="startCompare()" ontouchend="endCompare()"
                 class="px-3 py-1.5 rounded-lg text-xs font-medium text-amber-400 hover:bg-amber-500/10 active:bg-amber-500/20 transition flex items-center gap-1.5 cursor-pointer">
@@ -167,11 +162,11 @@
             </button>
         </div>
 
-        <!-- 우측 액션: 이미지 불러오기 / AI 새 이미지 / 내보내기 -->
+        <!-- 우측 액션: 사진 불러오기 / AI 새 이미지 / 내보내기 -->
         <div class="flex items-center gap-2">
-            <label class="cursor-pointer px-3 py-1.5 rounded-xl bg-editor-card hover:bg-gray-800 border border-editor-border text-xs font-medium text-gray-200 transition flex items-center gap-1.5">
+            <label class="cursor-pointer px-3 py-1.5 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/40 text-xs font-semibold text-blue-200 transition flex items-center gap-1.5">
                 <i class="fa-solid fa-folder-open text-blue-400"></i>
-                <span class="hidden sm:inline">이미지 열기</span>
+                <span>사진 불러오기</span>
                 <input type="file" id="imageUpload" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
             </label>
 
@@ -185,7 +180,6 @@
                     <i class="fa-solid fa-download"></i>
                     <span>저장하기</span>
                 </button>
-                <!-- 포맷 선택 드롭다운 -->
                 <div class="absolute right-0 mt-1.5 w-36 bg-editor-card border border-editor-border rounded-xl shadow-xl py-1 hidden group-hover:block z-50">
                     <button onclick="exportImage('png')" class="w-full text-left px-3 py-2 text-xs text-gray-200 hover:bg-blue-600/20 hover:text-blue-400 flex items-center justify-between">
                         <span>PNG 고화질 저장</span>
@@ -202,65 +196,83 @@
 
     <!-- 메인 워크스페이스 영역 -->
     <div class="flex-1 flex flex-col lg:flex-row overflow-hidden">
-        
+
         <!-- 왼쪽/중앙: 메인 캔버스 & 상단 플로팅 AI 커맨드 바 -->
         <main class="flex-1 flex flex-col relative bg-editor-bg overflow-hidden">
-            
+
             <!-- 상단 자연어 명령어 입력창 (Floating Command Bar) -->
-            <div class="w-full max-w-3xl mx-auto px-4 pt-4 pb-2 z-20">
+            <div class="w-full max-w-4xl mx-auto px-4 pt-3.5 pb-2 z-20">
                 <div class="bg-editor-panel/95 backdrop-blur-md border border-editor-border rounded-2xl p-2 command-glow transition-all duration-200">
                     <div class="flex items-center gap-2">
                         <div class="pl-3 text-blue-400 flex items-center">
                             <i class="fa-solid fa-terminal text-sm"></i>
                         </div>
-                        <input type="text" id="commandInput" 
-                            placeholder="말하는 대로 다 편집됩니다! (예: '16:9로 자르고 시네마틱 레터박스 넣고 하단에 VLOG #01 자막 추가해줘')" 
+                        <input type="text" id="commandInput"
+                            placeholder="말하는 대로 다 편집됩니다! (예: '옷을 벗겨줘', '가디건 벗겨줘', '들고 있는 핸드폰 없애줘', '손 동작 바꿔줘')"
                             class="w-full bg-transparent text-sm text-white placeholder-gray-500 focus:outline-none py-2 px-1"
                             onkeydown="if(event.key === 'Enter') executeAICommand()">
-                        
+
                         <button id="btnExecute" onclick="executeAICommand()" class="shrink-0 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-semibold shadow-md transition flex items-center gap-2 cursor-pointer">
                             <i class="fa-solid fa-wand-magic-sparkles"></i>
                             <span>AI 실행</span>
                         </button>
                     </div>
 
-                    <!-- 빠른 명령어 추천 칩 (Quick Prompts) -->
-                    <div class="flex items-center gap-1.5 overflow-x-auto pt-2 pb-1 px-2 border-t border-editor-border/60 mt-1.5 no-scrollbar">
-                        <span class="text-[11px] text-gray-500 shrink-0 mr-1"><i class="fa-solid fa-bolt text-amber-400 mr-1"></i>즉시 픽셀 편집:</span>
-                        <button onclick="applyQuickPrompt('가디건처럼 옷을 벗겨줘', true)" class="shrink-0 px-2.5 py-1 rounded-lg bg-rose-950/50 hover:bg-rose-900/50 border border-rose-500/40 text-[11px] text-rose-200 transition">
-                            🧥 가디건 벗겨줘 (픽셀)
-                        </button>
-                        <button onclick="applyQuickPrompt('들고 있는 핸드폰 없애줘', true)" class="shrink-0 px-2.5 py-1 rounded-lg bg-purple-950/50 hover:bg-purple-900/50 border border-purple-500/40 text-[11px] text-purple-200 transition">
-                            📱 들고 있는 핸드폰 없애줘
-                        </button>
-                        <button onclick="applyQuickPrompt('손 동작을 브이 포즈로 자연스럽게 바꿔줘', true)" class="shrink-0 px-2.5 py-1 rounded-lg bg-indigo-950/50 hover:bg-indigo-900/50 border border-indigo-500/40 text-[11px] text-indigo-200 transition">
-                            ✌️ 손 동작 바꿔줘
-                        </button>
-                        <button onclick="applyQuickPrompt('시네마틱 레터박스 넣고 맑고 따뜻한 색감으로 선명하게 보정해줘')" class="shrink-0 px-2.5 py-1 rounded-lg bg-editor-card hover:bg-gray-800 border border-editor-border text-[11px] text-gray-300 transition">
-                            🎬 시네마틱 레터박스 + 맑은 색감
-                        </button>
-                        <button onclick="applyQuickPrompt('16:9 비율로 자르고 하단 중앙에 VLOG #01 자막을 세련되게 추가해줘')" class="shrink-0 px-2.5 py-1 rounded-lg bg-editor-card hover:bg-gray-800 border border-editor-border text-[11px] text-gray-300 transition">
-                            📺 16:9 크롭 + VLOG 자막
-                        </button>
-                        <button onclick="applyQuickPrompt('배경을 붉은 노을이 지는 아름다운 바다 풍경으로 바꿔줘', true)" class="shrink-0 px-2.5 py-1 rounded-lg bg-purple-950/50 hover:bg-purple-900/50 border border-purple-500/40 text-[11px] text-purple-300 transition">
-                            🌅 AI 배경 교체 (노을 바다)
-                        </button>
+                    <!-- 빠른 명령어 추천 칩 & 영역 지정 브러시 컨트롤 -->
+                    <div class="flex items-center justify-between gap-2 overflow-x-auto pt-2 pb-1 px-2 border-t border-editor-border/60 mt-1.5 no-scrollbar">
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <span class="text-[11px] text-gray-500 shrink-0 mr-0.5"><i class="fa-solid fa-bolt text-amber-400 mr-1"></i>직접 픽셀 편집:</span>
+                            <button onclick="applyQuickPrompt('옷을 벗겨줘', true)" class="shrink-0 px-2.5 py-1 rounded-lg bg-rose-950/60 hover:bg-rose-900/60 border border-rose-500/40 text-[11px] text-rose-200 transition">
+                                🧥 옷을 벗겨줘
+                            </button>
+                            <button onclick="applyQuickPrompt('가디건 벗겨줘', true)" class="shrink-0 px-2.5 py-1 rounded-lg bg-rose-950/60 hover:bg-rose-900/60 border border-rose-500/40 text-[11px] text-rose-200 transition">
+                                🧶 가디건 벗겨줘
+                            </button>
+                            <button onclick="applyQuickPrompt('들고 있는 핸드폰 없애줘', true)" class="shrink-0 px-2.5 py-1 rounded-lg bg-purple-950/60 hover:bg-purple-900/60 border border-purple-500/40 text-[11px] text-purple-200 transition">
+                                📱 핸드폰 없애줘
+                            </button>
+                            <button onclick="applyQuickPrompt('손 동작을 브이 포즈로 자연스럽게 바꿔줘', true)" class="shrink-0 px-2.5 py-1 rounded-lg bg-indigo-950/60 hover:bg-indigo-900/60 border border-indigo-500/40 text-[11px] text-indigo-200 transition">
+                                ✋ 손 동작 바꿔줘
+                            </button>
+                            <button onclick="applyQuickPrompt('배경을 붉은 노을이 지는 바다 풍경으로 바꿔줘', true)" class="shrink-0 px-2.5 py-1 rounded-lg bg-purple-950/60 hover:bg-purple-900/60 border border-purple-500/40 text-[11px] text-purple-300 transition">
+                                🌅 배경 교체
+                            </button>
+                            <button onclick="applyQuickPrompt('16:9 비율로 자르고 시네마틱 레터박스 넣고 맑고 선명하게 보정해줘')" class="shrink-0 px-2.5 py-1 rounded-lg bg-editor-card hover:bg-gray-800 border border-editor-border text-[11px] text-gray-300 transition">
+                                🎬 16:9 + 레터박스 보정
+                            </button>
+                        </div>
+
+                        <!-- 브러시 마스크 툴 -->
+                        <div class="flex items-center gap-1 shrink-0 pl-2 border-l border-editor-border/70">
+                            <button id="btnBrushToggle" onclick="toggleBrushMask()" class="px-2.5 py-1 rounded-lg bg-editor-card hover:bg-gray-800 border border-editor-border text-[11px] text-gray-300 transition flex items-center gap-1" title="수정할 부위를 칠해 AI에게 영역을 지정합니다">
+                                <i class="fa-solid fa-paintbrush text-pink-400"></i>
+                                <span>영역 브러시</span>
+                            </button>
+                            <button id="btnClearMask" onclick="clearBrushMask()" class="hidden px-2 py-1 rounded-lg bg-editor-card hover:bg-gray-800 border border-editor-border text-[11px] text-gray-400 hover:text-white transition" title="브러시 영역 지우기">
+                                <i class="fa-solid fa-eraser"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- 중앙 캔버스 프리뷰 컨테이너 (드래그 앤 드롭 업로드 및 레이어 이동 지원) -->
-            <div id="canvasWrapper" 
-                ondragover="event.preventDefault(); this.classList.add('ring-2', 'ring-blue-500');" 
+            <!-- 중앙 캔버스 프리뷰 컨테이너 (파일 드롭, 붙여넣기, 레이어 드래그, 브러시 마스크 지원) -->
+            <div id="canvasWrapper"
+                ondragover="event.preventDefault(); this.classList.add('ring-2', 'ring-blue-500');"
                 ondragleave="this.classList.remove('ring-2', 'ring-blue-500');"
                 ondrop="handleCanvasDrop(event)"
                 class="flex-1 flex items-center justify-center p-4 sm:p-6 relative overflow-hidden transition-all">
                 <div class="relative max-w-full max-h-full flex items-center justify-center rounded-2xl overflow-hidden shadow-2xl border border-editor-border canvas-checkerboard">
-                    <canvas id="editorCanvas" class="max-w-full max-h-[58vh] lg:max-h-[66vh] object-contain block cursor-default"></canvas>
-                    
+                    <canvas id="editorCanvas" class="max-w-full max-h-[56vh] lg:max-h-[64vh] object-contain block cursor-default"></canvas>
+
                     <!-- 캔버스 인터랙션 힌트 배지 -->
-                    <div id="dragHintBadge" class="hidden absolute bottom-3 right-3 px-2.5 py-1 rounded-lg bg-black/60 text-gray-300 text-[10px] backdrop-blur-sm pointer-events-none">
-                        <i class="fa-solid fa-up-down-left-right mr-1 text-blue-400"></i>자막·스티커를 마우스로 드래그해 이동 가능
+                    <div id="dragHintBadge" class="hidden absolute bottom-3 right-3 px-2.5 py-1 rounded-lg bg-black/65 text-gray-200 text-[10px] backdrop-blur-sm pointer-events-none">
+                        <i class="fa-solid fa-up-down-left-right mr-1 text-blue-400"></i>자막·스티커 드래그 이동 가능
+                    </div>
+
+                    <!-- 브러시 활성 안내 배지 -->
+                    <div id="brushHintBadge" class="hidden absolute bottom-3 left-3 px-2.5 py-1 rounded-lg bg-pink-600/85 text-white text-[10px] font-medium backdrop-blur-sm pointer-events-none">
+                        <i class="fa-solid fa-paintbrush mr-1"></i>수정할 영역(옷·가디건·핸드폰 등)을 칠한 뒤 명령을 입력하세요
                     </div>
 
                     <!-- 원본 비교 배지 -->
@@ -277,21 +289,24 @@
                         <p id="aiLoadingDesc" class="text-xs text-gray-400 max-w-sm">현재 이미지 픽셀을 기반으로 직접 다시 그리고 있습니다.</p>
                     </div>
 
-                    <!-- 픽셀 편집 실패 원인 안내 및 즉시 재시도 패널 -->
+                    <!-- 픽셀 편집 실패 원인 안내 / 재시도 / 로컬 픽셀 도구 폴백 배너 -->
                     <div id="aiErrorPanel" class="hidden absolute inset-0 bg-editor-bg/92 backdrop-blur-md flex flex-col items-center justify-center z-30 p-6 text-center">
                         <div class="w-12 h-12 rounded-2xl bg-red-500/15 border border-red-500/40 flex items-center justify-center text-red-400 mb-3">
                             <i class="fa-solid fa-triangle-exclamation text-lg"></i>
                         </div>
-                        <h4 class="text-sm font-bold text-white mb-1">AI 픽셀 편집을 완료하지 못했습니다</h4>
+                        <h4 class="text-sm font-bold text-white mb-1">AI 픽셀 편집이 완료되지 않았습니다</h4>
                         <p id="aiErrorReason" class="text-xs text-red-300 bg-red-950/50 border border-red-500/30 rounded-xl px-3.5 py-2.5 max-w-md mb-2 leading-relaxed">
                             모델 응답에서 이미지 데이터를 받지 못했습니다.
                         </p>
                         <p class="text-[11px] text-gray-400 max-w-md mb-4">
-                            화면 밝기나 자막으로 임의 대체하지 않았습니다. 표현을 다듬거나 즉시 재시도해보세요.
+                            화면 밝기나 자막으로 임의 대체하지 않았습니다. 원클릭 재시도를 누르거나 [로컬 픽셀 시뮬레이션]으로 테스트할 수 있습니다.
                         </p>
-                        <div class="flex items-center gap-2">
+                        <div class="flex flex-wrap items-center justify-center gap-2">
                             <button onclick="retryLastPixelEdit()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-lg transition flex items-center gap-1.5 cursor-pointer">
                                 <i class="fa-solid fa-rotate-right"></i> 즉시 재시도
+                            </button>
+                            <button onclick="runLocalPixelFallback()" class="px-4 py-2 rounded-xl bg-purple-600/25 hover:bg-purple-600/40 border border-purple-500/40 text-purple-200 text-xs font-semibold transition flex items-center gap-1.5 cursor-pointer">
+                                <i class="fa-solid fa-sliders"></i> 로컬 픽셀 시뮬레이션 적용
                             </button>
                             <button onclick="dismissPixelError()" class="px-4 py-2 rounded-xl bg-editor-card hover:bg-gray-800 border border-editor-border text-gray-300 text-xs font-medium transition cursor-pointer">
                                 닫기
@@ -303,22 +318,18 @@
 
             <!-- 하단 샘플 갤러리 & 모바일 컨트롤 바 -->
             <div class="bg-editor-panel border-t border-editor-border px-4 py-2.5 flex flex-wrap items-center justify-between gap-3">
-                <!-- 샘플 이미지 선택 -->
-                <div class="flex items-center gap-2 overflow-x-auto">
+                <div class="flex items-center gap-2 overflow-x-auto no-scrollbar">
                     <span class="text-xs text-gray-400 font-medium shrink-0"><i class="fa-regular fa-images mr-1 text-blue-400"></i>샘플:</span>
                     <button onclick="loadSampleImage('cardigan')" class="px-2.5 py-1 rounded-lg bg-editor-card hover:bg-gray-800 border border-editor-border text-xs text-gray-200 transition shrink-0">
-                        🧥 가디건 걸친 인물
+                        🧥 가디건 인물
                     </button>
                     <button onclick="loadSampleImage('phone_person')" class="px-2.5 py-1 rounded-lg bg-editor-card hover:bg-gray-800 border border-editor-border text-xs text-gray-200 transition shrink-0">
                         📱 핸드폰 든 인물
                     </button>
-                    <button onclick="loadSampleImage('mountain')" class="px-2.5 py-1 rounded-lg bg-editor-card hover:bg-gray-800 border border-editor-border text-xs text-gray-300 transition shrink-0">
-                        🏔️ 산책로 풍경
+                    <button onclick="loadSampleImage('park_walk')" class="px-2.5 py-1 rounded-lg bg-editor-card hover:bg-gray-800 border border-editor-border text-xs text-gray-200 transition shrink-0">
+                        🌸 햇살 산책로
                     </button>
-                    <button onclick="loadSampleImage('city')" class="px-2.5 py-1 rounded-lg bg-editor-card hover:bg-gray-800 border border-editor-border text-xs text-gray-300 transition shrink-0">
-                        🌃 도심 야경
-                    </button>
-                    <button onclick="loadSampleImage('cafe')" class="px-2.5 py-1 rounded-lg bg-editor-card hover:bg-gray-800 border border-editor-border text-xs text-gray-300 transition shrink-0">
+                    <button onclick="loadSampleImage('cafe')" class="px-2.5 py-1 rounded-lg bg-editor-card hover:bg-gray-800 border border-editor-border text-xs text-gray-200 transition shrink-0">
                         ☕ 감성 카페
                     </button>
                 </div>
@@ -330,16 +341,15 @@
                     <button ontouchstart="startCompare()" ontouchend="endCompare()" onmousedown="startCompare()" onmouseup="endCompare()" class="px-2.5 py-1.5 rounded-lg bg-amber-500/20 text-amber-300 text-xs font-medium">원본 비교</button>
                 </div>
 
-                <!-- 캔버스 해상도 정보 -->
                 <div id="canvasInfo" class="hidden sm:block text-[11px] text-gray-500 font-mono">
-                    1200 × 800 px
+                    1200 × 750 px
                 </div>
             </div>
         </main>
 
         <!-- 오른쪽 패널: AI 처리 효과 레이어, 세부 조정 슬라이더, 텍스트 오버레이, 히스토리 -->
         <aside class="w-full lg:w-88 xl:w-96 bg-editor-panel border-t lg:border-t-0 lg:border-l border-editor-border flex flex-col max-h-[50vh] lg:max-h-none overflow-y-auto">
-            
+
             <!-- 탭 네비게이션 -->
             <div class="grid grid-cols-3 border-b border-editor-border bg-editor-bg/50 sticky top-0 z-10">
                 <button onclick="switchTab('effects')" id="tabBtn-effects" class="py-3 text-xs font-semibold text-blue-400 border-b-2 border-blue-500 transition flex items-center justify-center gap-1.5">
@@ -355,7 +365,7 @@
 
             <!-- 탭 1: AI 처리 효과 레이어, 변형(크롭/회전/반전), 프레임/날씨, 색보정 슬라이더 -->
             <div id="tabContent-effects" class="p-4 space-y-5">
-                
+
                 <!-- AI 활성 효과 레이어 카드 -->
                 <div>
                     <div class="flex items-center justify-between mb-2">
@@ -374,8 +384,7 @@
                 <!-- 비율 크롭 / 회전 / 반전 / 프레임 빠른 도구 -->
                 <div class="space-y-3 pt-2 border-t border-editor-border">
                     <h3 class="text-xs font-bold text-gray-300 uppercase tracking-wider">구도 · 변형 · 시네마 효과</h3>
-                    
-                    <!-- 비율 크롭 -->
+
                     <div>
                         <span class="block text-[11px] text-gray-400 mb-1.5">화면 비율 (Aspect Ratio Crop)</span>
                         <div class="grid grid-cols-5 gap-1">
@@ -387,7 +396,6 @@
                         </div>
                     </div>
 
-                    <!-- 회전 및 반전 -->
                     <div class="grid grid-cols-4 gap-1.5">
                         <button onclick="rotateCanvas(-90)" class="py-1.5 px-2 rounded-lg bg-editor-card hover:bg-gray-800 border border-editor-border text-[11px] text-gray-300 flex items-center justify-center gap-1">
                             <i class="fa-solid fa-rotate-left text-blue-400"></i> -90°
@@ -403,7 +411,6 @@
                         </button>
                     </div>
 
-                    <!-- 프레임 & 날씨 오버레이 토글 -->
                     <div class="grid grid-cols-2 gap-2 pt-1">
                         <div>
                             <label class="block text-[11px] text-gray-400 mb-1">프레임 / 레터박스</label>
@@ -434,7 +441,6 @@
                         <button onclick="resetFiltersOnly()" class="text-[11px] text-gray-400 hover:text-blue-400 transition">색보정 초기화</button>
                     </div>
 
-                    <!-- 밝기 -->
                     <div class="space-y-1">
                         <div class="flex justify-between text-xs">
                             <span class="text-gray-400">밝기 (Brightness)</span>
@@ -443,7 +449,6 @@
                         <input type="range" id="slider-brightness" min="30" max="200" value="100" oninput="updateFilterParam('brightness', this.value)" onchange="commitHistory('밝기 수동 조절')">
                     </div>
 
-                    <!-- 대비 -->
                     <div class="space-y-1">
                         <div class="flex justify-between text-xs">
                             <span class="text-gray-400">대비 / 선명도 (Contrast)</span>
@@ -452,7 +457,6 @@
                         <input type="range" id="slider-contrast" min="30" max="200" value="100" oninput="updateFilterParam('contrast', this.value)" onchange="commitHistory('대비 수동 조절')">
                     </div>
 
-                    <!-- 채도 -->
                     <div class="space-y-1">
                         <div class="flex justify-between text-xs">
                             <span class="text-gray-400">채도 (Saturation)</span>
@@ -461,7 +465,6 @@
                         <input type="range" id="slider-saturate" min="0" max="220" value="100" oninput="updateFilterParam('saturate', this.value)" onchange="commitHistory('채도 수동 조절')">
                     </div>
 
-                    <!-- 색온도 (Warmth / Coolness) -->
                     <div class="space-y-1">
                         <div class="flex justify-between text-xs">
                             <span class="text-gray-400">색온도 (Warmth)</span>
@@ -470,7 +473,6 @@
                         <input type="range" id="slider-warmth" min="-50" max="50" value="0" oninput="updateFilterParam('warmth', this.value)" onchange="commitHistory('색온도 수동 조절')">
                     </div>
 
-                    <!-- 세피아 / 빈티지 -->
                     <div class="space-y-1">
                         <div class="flex justify-between text-xs">
                             <span class="text-gray-400">빈티지 세피아 (Sepia)</span>
@@ -479,7 +481,6 @@
                         <input type="range" id="slider-sepia" min="0" max="100" value="0" oninput="updateFilterParam('sepia', this.value)" onchange="commitHistory('세피아 수동 조절')">
                     </div>
 
-                    <!-- 흑백 -->
                     <div class="space-y-1">
                         <div class="flex justify-between text-xs">
                             <span class="text-gray-400">흑백 (Grayscale)</span>
@@ -488,7 +489,6 @@
                         <input type="range" id="slider-grayscale" min="0" max="100" value="0" oninput="updateFilterParam('grayscale', this.value)" onchange="commitHistory('흑백 수동 조절')">
                     </div>
 
-                    <!-- 색상 반전 -->
                     <div class="space-y-1">
                         <div class="flex justify-between text-xs">
                             <span class="text-gray-400">색상 반전 (Invert)</span>
@@ -497,7 +497,6 @@
                         <input type="range" id="slider-invert" min="0" max="100" value="0" oninput="updateFilterParam('invert', this.value)" onchange="commitHistory('색상 반전 조절')">
                     </div>
 
-                    <!-- 블러 / 소프트 포커스 -->
                     <div class="space-y-1">
                         <div class="flex justify-between text-xs">
                             <span class="text-gray-400">블러 / 몽환효과 (Blur)</span>
@@ -506,7 +505,6 @@
                         <input type="range" id="slider-blur" min="0" max="15" step="0.5" value="0" oninput="updateFilterParam('blur', this.value)" onchange="commitHistory('블러 수동 조절')">
                     </div>
 
-                    <!-- 비네팅 -->
                     <div class="space-y-1">
                         <div class="flex justify-between text-xs">
                             <span class="text-gray-400">비네팅 (Vignette)</span>
@@ -515,7 +513,6 @@
                         <input type="range" id="slider-vignette" min="0" max="100" value="0" oninput="updateFilterParam('vignette', this.value)" onchange="commitHistory('비네팅 수동 조절')">
                     </div>
 
-                    <!-- 줌 / 확대 -->
                     <div class="space-y-1">
                         <div class="flex justify-between text-xs">
                             <span class="text-gray-400">줌 배율 (Zoom)</span>
@@ -540,7 +537,6 @@
                     </div>
                 </div>
 
-                <!-- 빠른 이모지 스티커 팔레트 -->
                 <div class="flex items-center justify-between bg-editor-bg p-2 rounded-xl border border-editor-border">
                     <span class="text-[11px] text-gray-400 pl-1">스티커 추가:</span>
                     <div class="flex gap-1">
@@ -553,14 +549,12 @@
                     </div>
                 </div>
 
-                <!-- 레이어 목록 리스트 -->
                 <div id="layersListContainer" class="space-y-2 max-h-44 overflow-y-auto">
                     <div class="text-xs text-gray-500 text-center py-4 bg-editor-bg rounded-xl border border-editor-border">
                         추가된 자막이나 스티커가 없습니다.
                     </div>
                 </div>
 
-                <!-- 선택된 레이어 상세 속성 편집기 -->
                 <div id="selectedLayerEditor" class="hidden space-y-3 bg-editor-bg p-3 rounded-xl border border-blue-500/40">
                     <div class="flex items-center justify-between border-b border-editor-border pb-2">
                         <span class="text-xs font-bold text-blue-400">선택된 레이어 속성</span>
@@ -571,7 +565,7 @@
 
                     <div>
                         <label class="block text-xs text-gray-400 mb-1">내용 (텍스트 / 이모지)</label>
-                        <input type="text" id="layerTextInput" 
+                        <input type="text" id="layerTextInput"
                             class="w-full bg-editor-card border border-editor-border rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500"
                             oninput="updateSelectedLayerFromUI()">
                     </div>
@@ -631,9 +625,7 @@
                     <h3 class="text-xs font-bold text-gray-300 uppercase tracking-wider">편집 히스토리 타임라인</h3>
                     <span class="text-[11px] text-gray-500">클릭하여 시점 복원</span>
                 </div>
-                <div id="historyList" class="space-y-2">
-                    <!-- 동적으로 히스토리 아이템 추가됨 -->
-                </div>
+                <div id="historyList" class="space-y-2"></div>
             </div>
 
         </aside>
@@ -651,20 +643,20 @@
                 </div>
                 <button onclick="closeGenerateModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            
+
             <p class="text-xs text-gray-400 leading-relaxed">
-                원하는 장면이나 피사체를 한국어로 묘사하면 Gemini 이미지 모델이 새로운 베이스 이미지를 생성합니다. 생성 후 자연어로 즉시 추가 편집할 수 있습니다.
+                원하는 장면이나 피사체를 한국어로 묘사하면 Gemini 이미지 모델이 새로운 베이스 이미지를 생성합니다.
             </p>
 
             <div>
-                <textarea id="generatePromptInput" rows="3" 
-                    placeholder="예: 벚꽃이 흩날리는 서울의 고궁 산책로를 걷는 따뜻한 봄날의 풍경, 고화질 사진"
+                <textarea id="generatePromptInput" rows="3"
+                    placeholder="예: 벚꽃이 흩날리는 공원 산책로를 걷는 따뜻한 봄날의 풍경, 고화질 사진"
                     class="w-full bg-editor-bg border border-editor-border rounded-xl p-3 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"></textarea>
             </div>
 
             <div class="flex flex-wrap gap-1.5">
                 <button onclick="document.getElementById('generatePromptInput').value='노을이 지는 한강 공원의 감성적인 피크닉 풍경, 시네마틱 사진'" class="text-[11px] px-2.5 py-1 rounded-lg bg-editor-card hover:bg-gray-800 text-gray-300 border border-editor-border">🌅 한강 노을 피크닉</button>
-                <button onclick="document.getElementById('generatePromptInput').value='비가 내린 후 네온사인이 반사되는 미래적인 서울 밤거리, 사이버펑크 감성'" class="text-[11px] px-2.5 py-1 rounded-lg bg-editor-card hover:bg-gray-800 text-gray-300 border border-editor-border">🌃 네온 서울 밤거리</button>
+                <button onclick="document.getElementById('generatePromptInput').value='비가 내린 후 네온사인이 반사되는 서울 밤거리, 시네마틱 사진'" class="text-[11px] px-2.5 py-1 rounded-lg bg-editor-card hover:bg-gray-800 text-gray-300 border border-editor-border">🌃 네온 서울 밤거리</button>
             </div>
 
             <div class="flex justify-end gap-2 pt-2">
@@ -687,22 +679,27 @@
         const TEXT_MODEL = "gemini-2.5-flash";
         const IMAGE_MODELS = ["gemini-2.5-flash-image", "gemini-3.1-flash-image-preview"];
 
-        let lastFailedPixelRequest = null;
-
         const canvas = document.getElementById('editorCanvas');
         const ctx = canvas.getContext('2d');
 
+        // 브러시 마스크 전용 오프스크린 캔버스
+        const maskCanvas = document.createElement('canvas');
+        const maskCtx = maskCanvas.getContext('2d');
+        let isBrushActive = false;
+        let isDrawingMask = false;
+        let hasMaskStrokes = false;
+
         let baseImage = new Image();
-        baseImage.crossOrigin = "anonymous";
         let originalBaseImageSrc = "";
         let isComparingOriginal = false;
+        let lastFailedPixelRequest = null;
 
         // 캔버스 위 레이어 드래그 상태
         let selectedLayerId = null;
         let isDraggingLayer = false;
         let dragOffsetX = 0;
         let dragOffsetY = 0;
-        let renderedLayerBounds = []; // 히트 테스트용 바운딩 박스 캐시
+        let renderedLayerBounds = [];
 
         // 고정 시드 파티클 (날씨 오버레이용)
         const weatherParticles = Array.from({ length: 85 }, (_, i) => ({
@@ -712,49 +709,65 @@
             angle: ((i % 7) - 3) * 0.15
         }));
 
-        // 현재 편집 상태 객체
         let currentState = {
             imageSrc: "",
             filters: {
-                brightness: 100, // %
-                contrast: 100,   // %
-                saturate: 100,   // %
-                warmth: 0,       // -50 ~ +50
-                sepia: 0,        // 0 ~ 100%
-                grayscale: 0,    // 0 ~ 100%
-                invert: 0,       // 0 ~ 100%
-                blur: 0,         // 0 ~ 15px
-                vignette: 0      // 0 ~ 100%
+                brightness: 100,
+                contrast: 100,
+                saturate: 100,
+                warmth: 0,
+                sepia: 0,
+                grayscale: 0,
+                invert: 0,
+                blur: 0,
+                vignette: 0
             },
             transform: {
-                aspectRatio: "original", // original, 1:1, 16:9, 9:16, 4:3
-                rotation: 0,             // 0, 90, 180, 270
+                aspectRatio: "original",
+                rotation: 0,
                 flipH: false,
                 flipV: false,
-                zoom: 100                // 100 ~ 200%
+                zoom: 100
             },
             overlays: {
-                frame: "none",           // none, letterbox, polaroid, white-border
-                weather: "none"          // none, sunflare, snow, rain, sakura
+                frame: "none",
+                weather: "none"
             },
-            layers: [], // 다중 자막 & 스티커 레이어: { id, type: 'text'|'sticker', text, xNorm, yNorm, fontFamily, color, size, hasBg }
-            aiLayers: [] // 최근 AI가 적용한 작업 내역
+            layers: [],
+            aiLayers: []
         };
 
-        // 실행 취소 / 다시 실행 히스토리 스택
         let historyStack = [];
         let historyIndex = -1;
 
         // ==========================================
-        // 2. 초기화 및 고화질 프로시저럴 샘플 이미지 생성기
+        // 2. 초기화 및 안정적인 클라이언트 샘플 이미지 생성
         // ==========================================
         window.onload = function () {
             setupCanvasInteractions();
-            loadSampleImage('mountain');
+            setupClipboardPasteListener();
+            loadSampleImage('cardigan');
         };
 
+        function setupClipboardPasteListener() {
+            window.addEventListener('paste', (event) => {
+                const items = event.clipboardData?.items;
+                if (!items) return;
+                for (let i = 0; i < items.length; i++) {
+                    if (items[i].type && items[i].type.startsWith('image/')) {
+                        const file = items[i].getAsFile();
+                        if (file) {
+                            event.preventDefault();
+                            loadImageFile(file);
+                            break;
+                        }
+                    }
+                }
+            });
+        }
+
         /**
-         * 외부 URL 깨짐 방지를 위해 Canvas API로 고품질 일러스트/풍경 샘플을 즉시 생성하여 로드
+         * 외부 URL 없이 100% 클라이언트 Canvas로 고품질 테스트 샘플 이미지를 생성하여 로드
          */
         function loadSampleImage(type) {
             const tempCanvas = document.createElement('canvas');
@@ -763,21 +776,19 @@
             const tCtx = tempCanvas.getContext('2d');
 
             if (type === 'cardigan') {
-                // 가디건/겉옷을 걸친 인물 테스트 샘플
                 const bgGrad = tCtx.createLinearGradient(0, 0, 1200, 750);
                 bgGrad.addColorStop(0, '#2B3548');
-                bgGrad.addColorStop(1, '#182030');
+                bgGrad.addColorStop(1, '#161E2E');
                 tCtx.fillStyle = bgGrad;
                 tCtx.fillRect(0, 0, 1200, 750);
 
-                // 부드러운 실내 조명
                 const lampGrad = tCtx.createRadialGradient(600, 220, 30, 600, 260, 480);
-                lampGrad.addColorStop(0, 'rgba(255, 232, 190, 0.28)');
-                lampGrad.addColorStop(1, 'rgba(24, 32, 48, 0)');
+                lampGrad.addColorStop(0, 'rgba(255, 232, 190, 0.25)');
+                lampGrad.addColorStop(1, 'rgba(22, 30, 46, 0)');
                 tCtx.fillStyle = lampGrad;
                 tCtx.fillRect(0, 0, 1200, 750);
 
-                // 인물 머리 & 목 & 이너 티셔츠
+                // 머리 & 얼굴
                 tCtx.fillStyle = '#E6B89C';
                 tCtx.beginPath();
                 tCtx.arc(600, 235, 78, 0, Math.PI * 2);
@@ -789,7 +800,7 @@
                 tCtx.arc(600, 222, 84, Math.PI * 0.95, Math.PI * 2.05);
                 tCtx.fill();
 
-                // 목 & 이너 흰색 크루넥 상의
+                // 목 & 이너 흰색 반팔 상의
                 tCtx.fillStyle = '#E6B89C';
                 tCtx.fillRect(574, 302, 52, 42);
                 tCtx.fillStyle = '#F8FAFC';
@@ -797,7 +808,7 @@
                 tCtx.ellipse(600, 560, 145, 220, 0, Math.PI, Math.PI * 2);
                 tCtx.fill();
 
-                // 양쪽에 걸친 니트 가디건 겉옷 (테라코타/브라운 컬러)
+                // 가디건 겉옷 (테라코타 니트)
                 tCtx.fillStyle = '#A8583B';
                 tCtx.beginPath();
                 tCtx.moveTo(465, 345);
@@ -830,7 +841,6 @@
                 tCtx.arc(798, 650, 26, 0, Math.PI * 2);
                 tCtx.fill();
             } else if (type === 'phone_person') {
-                // 손에 핸드폰을 들고 있는 인물 테스트 샘플
                 const bgGrad = tCtx.createLinearGradient(0, 0, 1200, 750);
                 bgGrad.addColorStop(0, '#1E293B');
                 bgGrad.addColorStop(1, '#0F172A');
@@ -847,13 +857,11 @@
                 tCtx.arc(600, 228, 82, Math.PI, Math.PI * 2);
                 tCtx.fill();
 
-                // 상의
                 tCtx.fillStyle = '#334155';
                 tCtx.beginPath();
                 tCtx.ellipse(600, 575, 175, 210, 0, Math.PI, Math.PI * 2);
                 tCtx.fill();
 
-                // 오른손이 스마트폰을 들고 있는 모습
                 tCtx.strokeStyle = '#334155';
                 tCtx.lineWidth = 54;
                 tCtx.lineCap = 'round';
@@ -869,74 +877,60 @@
                 tCtx.fillStyle = '#38BDF8';
                 tCtx.fillRect(642, 490, 62, 114);
 
-                // 손가락 디테일
                 tCtx.fillStyle = '#E5B99E';
                 tCtx.beginPath();
                 tCtx.arc(672, 548, 26, 0, Math.PI * 2);
                 tCtx.fill();
-            } else if (type === 'mountain') {
-                // 원목 테이블
-                tCtx.fillStyle = '#5C3D2E';
+            } else if (type === 'park_walk') {
+                const skyGrad = tCtx.createLinearGradient(0, 0, 0, 460);
+                skyGrad.addColorStop(0, '#38BDF8');
+                skyGrad.addColorStop(1, '#BAE6FD');
+                tCtx.fillStyle = skyGrad;
+                tCtx.fillRect(0, 0, 1200, 460);
+
+                tCtx.fillStyle = '#475569';
+                tCtx.beginPath();
+                tCtx.moveTo(0, 430);
+                tCtx.lineTo(360, 210);
+                tCtx.lineTo(740, 260);
+                tCtx.lineTo(1200, 180);
+                tCtx.lineTo(1200, 460);
+                tCtx.lineTo(0, 460);
+                tCtx.closePath();
+                tCtx.fill();
+
+                tCtx.fillStyle = '#22C55E';
                 tCtx.fillRect(0, 430, 1200, 320);
 
-                // 라떼 아트 커피잔
-                tCtx.fillStyle = '#F3F4F6';
+                tCtx.fillStyle = '#D97706';
+                tCtx.beginPath();
+                tCtx.moveTo(520, 430);
+                tCtx.lineTo(680, 430);
+                tCtx.lineTo(940, 750);
+                tCtx.lineTo(260, 750);
+                tCtx.closePath();
+                tCtx.fill();
+            } else if (type === 'cafe') {
+                const wallGrad = tCtx.createLinearGradient(0, 0, 1200, 750);
+                wallGrad.addColorStop(0, '#3B281E');
+                wallGrad.addColorStop(1, '#1E140F');
+                tCtx.fillStyle = wallGrad;
+                tCtx.fillRect(0, 0, 1200, 750);
+
+                tCtx.fillStyle = '#6E4730';
+                tCtx.fillRect(0, 440, 1200, 310);
+
+                tCtx.fillStyle = '#F8FAFC';
                 tCtx.beginPath();
                 tCtx.arc(540, 470, 95, 0, Math.PI * 2);
                 tCtx.fill();
                 tCtx.fillStyle = '#8B5A2B';
                 tCtx.beginPath();
-                tCtx.arc(540, 470, 80, 0, Math.PI * 2);
+                tCtx.arc(540, 470, 78, 0, Math.PI * 2);
                 tCtx.fill();
-                // 하트 라떼아트
                 tCtx.fillStyle = '#FDE68A';
                 tCtx.beginPath();
-                tCtx.arc(540, 470, 28, 0, Math.PI * 2);
-                tCtx.fill();
-
-                // 크루아상 접시
-                tCtx.fillStyle = '#E5E7EB';
-                tCtx.beginPath();
-                tCtx.ellipse(830, 510, 130, 75, 0, 0, Math.PI * 2);
-                tCtx.fill();
-                tCtx.fillStyle = '#D97706';
-                tCtx.beginPath();
-                tCtx.ellipse(830, 505, 85, 42, -0.2, 0, Math.PI * 2);
-                tCtx.fill();
-            } else if (type === 'portrait') {
-                // 감성 인물 스냅 실루엣 & 보케 배경
-                const bgGrad = tCtx.createLinearGradient(0, 0, 1200, 750);
-                bgGrad.addColorStop(0, '#334155');
-                bgGrad.addColorStop(1, '#1E293B');
-                tCtx.fillStyle = bgGrad;
-                tCtx.fillRect(0, 0, 1200, 750);
-
-                // 배경 보케 빛망울
-                const bokehColors = ['rgba(251, 191, 36, 0.25)', 'rgba(96, 165, 250, 0.22)', 'rgba(244, 114, 182, 0.22)'];
-                for (let i = 0; i < 24; i++) {
-                    tCtx.fillStyle = bokehColors[i % 3];
-                    tCtx.beginPath();
-                    tCtx.arc((i * 173) % 1200, (i * 113) % 650, 30 + (i % 4) * 18, 0, Math.PI * 2);
-                    tCtx.fill();
-                }
-
-                // 인물 실루엣 (상반신)
-                tCtx.fillStyle = '#E2B49A'; // 피부톤
-                tCtx.beginPath();
-                tCtx.arc(600, 310, 95, 0, Math.PI * 2);
-                tCtx.fill();
-
-                // 헤어
-                tCtx.fillStyle = '#1F2937';
-                tCtx.beginPath();
-                tCtx.arc(600, 295, 105, Math.PI, Math.PI * 2);
-                tCtx.fill();
-                tCtx.fillRect(495, 295, 210, 160);
-
-                // 상의
-                tCtx.fillStyle = '#F8FAFC';
-                tCtx.beginPath();
-                tCtx.ellipse(600, 620, 210, 190, 0, Math.PI, Math.PI * 2);
+                tCtx.arc(540, 470, 26, 0, Math.PI * 2);
                 tCtx.fill();
             }
 
@@ -945,11 +939,17 @@
         }
 
         function setNewBaseImage(src, actionLabel = "새 이미지 로드") {
+            dismissPixelError();
+            lastFailedPixelRequest = null;
             originalBaseImageSrc = src;
-            baseImage = new Image();
-            baseImage.crossOrigin = "anonymous";
-            baseImage.onload = () => {
-                // 상태 초기화
+
+            const nextImg = new Image();
+            nextImg.onload = () => {
+                baseImage = nextImg;
+                maskCanvas.width = Math.max(1, nextImg.width);
+                maskCanvas.height = Math.max(1, nextImg.height);
+                clearBrushMask(false);
+
                 currentState = {
                     imageSrc: src,
                     filters: {
@@ -978,36 +978,505 @@
                 renderCanvas();
                 commitHistory(actionLabel);
             };
-            baseImage.src = src;
+            nextImg.onerror = () => {
+                showToast("이미지를 불러오는 중 오류가 발생했습니다.", "error");
+            };
+            nextImg.src = src;
         }
 
-        // 로컬 파일 업로드 및 캔버스 드래그 앤 드롭 처리
         function handleImageUpload(event) {
-            const file = event.target.files[0];
+            const input = event.target;
+            const file = input?.files?.[0];
             if (!file) return;
             loadImageFile(file);
+            input.value = "";
         }
 
         function handleCanvasDrop(event) {
             event.preventDefault();
             document.getElementById('canvasWrapper').classList.remove('ring-2', 'ring-blue-500');
             const file = event.dataTransfer?.files?.[0];
-            if (file && file.type.startsWith('image/')) {
+            if (file && file.type && file.type.startsWith('image/')) {
                 loadImageFile(file);
+            } else if (file) {
+                showToast("지원되는 이미지 파일(JPG, PNG, WEBP 등)을 선택해주세요.", "warning");
             }
         }
 
         function loadImageFile(file) {
             const reader = new FileReader();
             reader.onload = (e) => {
-                setNewBaseImage(e.target.result, `이미지 업로드: ${file.name}`);
-                showToast("이미지를 성공적으로 불러왔습니다.", "success");
+                if (typeof e.target?.result === 'string') {
+                    setNewBaseImage(e.target.result, `사진 불러오기: ${file.name || '이미지'}`);
+                    showToast("사진을 성공적으로 불러왔습니다!", "success");
+                }
+            };
+            reader.onerror = () => {
+                showToast("파일을 읽는 데 실패했습니다.", "error");
             };
             reader.readAsDataURL(file);
         }
 
         // ==========================================
-        // 4. Fast-Track 픽셀 편집 라우터 + Zero-Failure AI 엔진
+        // 3. 캔버스 렌더링, 브러시 마스크, 레이어 드래그 엔진
+        // ==========================================
+        function getTargetCanvasDimensions() {
+            const srcW = baseImage.width || 1200;
+            const srcH = baseImage.height || 750;
+            const isRotated90 = Math.abs(currentState.transform.rotation % 180) === 90;
+            const baseW = isRotated90 ? srcH : srcW;
+            const baseH = isRotated90 ? srcW : srcH;
+
+            const ratioMap = {
+                "1:1": 1,
+                "16:9": 16 / 9,
+                "9:16": 9 / 16,
+                "4:3": 4 / 3
+            };
+
+            const targetRatio = ratioMap[currentState.transform.aspectRatio];
+            if (!targetRatio) {
+                return { width: baseW, height: baseH };
+            }
+
+            const currentRatio = baseW / baseH;
+            if (currentRatio > targetRatio) {
+                return { width: Math.round(baseH * targetRatio), height: baseH };
+            } else {
+                return { width: baseW, height: Math.round(baseW / targetRatio) };
+            }
+        }
+
+        function buildCssFilterString(f) {
+            const warmthSepia = f.warmth > 0 ? f.warmth * 0.35 : 0;
+            const warmthHue = f.warmth > 0 ? -(f.warmth * 0.15) : -(f.warmth * 0.45);
+            const totalSepia = clamp(f.sepia + warmthSepia, 0, 100);
+            const warmthSatBoost = Math.abs(f.warmth) * 0.25;
+
+            return [
+                `brightness(${f.brightness}%)`,
+                `contrast(${f.contrast}%)`,
+                `saturate(${clamp(f.saturate + warmthSatBoost, 0, 250)}%)`,
+                `sepia(${totalSepia}%)`,
+                `grayscale(${f.grayscale}%)`,
+                `invert(${f.invert}%)`,
+                `hue-rotate(${warmthHue}deg)`,
+                `blur(${f.blur}px)`
+            ].join(' ');
+        }
+
+        function renderCanvas() {
+            if (!baseImage || !baseImage.complete || !baseImage.width) return;
+
+            if (isComparingOriginal && originalBaseImageSrc) {
+                canvas.width = baseImage.width;
+                canvas.height = baseImage.height;
+                ctx.save();
+                ctx.filter = 'none';
+                ctx.drawImage(baseImage, 0, 0, canvas.width, canvas.height);
+                ctx.restore();
+                document.getElementById('canvasInfo').textContent = `${canvas.width} × ${canvas.height} px (원본)`;
+                return;
+            }
+
+            const dims = getTargetCanvasDimensions();
+            canvas.width = dims.width;
+            canvas.height = dims.height;
+            document.getElementById('canvasInfo').textContent = `${canvas.width} × ${canvas.height} px`;
+
+            const f = currentState.filters;
+            const tr = currentState.transform;
+            const ov = currentState.overlays;
+
+            ctx.save();
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 1. 베이스 이미지 + 필터 + 회전/반전/줌 드로잉
+            ctx.save();
+            ctx.filter = buildCssFilterString(f);
+
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+            ctx.translate(cx, cy);
+            ctx.rotate((tr.rotation * Math.PI) / 180);
+            ctx.scale(
+                (tr.flipH ? -1 : 1) * (tr.zoom / 100),
+                (tr.flipV ? -1 : 1) * (tr.zoom / 100)
+            );
+
+            const isRotated90 = Math.abs(tr.rotation % 180) === 90;
+            const drawW = isRotated90 ? canvas.height : canvas.width;
+            const drawH = isRotated90 ? canvas.width : canvas.height;
+            const imgAspect = baseImage.width / baseImage.height;
+            const boxAspect = drawW / drawH;
+
+            let renderW = drawW;
+            let renderH = drawH;
+            if (imgAspect > boxAspect) {
+                renderH = drawW / imgAspect;
+            } else {
+                renderW = drawH * imgAspect;
+            }
+            const scaleToCover = Math.max(drawW / renderW, drawH / renderH);
+            renderW *= scaleToCover;
+            renderH *= scaleToCover;
+
+            ctx.drawImage(baseImage, -renderW / 2, -renderH / 2, renderW, renderH);
+            ctx.restore();
+
+            // 2. 색온도 글레이즈
+            if (f.warmth !== 0) {
+                ctx.save();
+                ctx.globalCompositeOperation = 'overlay';
+                if (f.warmth > 0) {
+                    ctx.fillStyle = `rgba(255, 155, 60, ${(f.warmth / 50) * 0.16})`;
+                } else {
+                    ctx.fillStyle = `rgba(70, 145, 255, ${(Math.abs(f.warmth) / 50) * 0.16})`;
+                }
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.restore();
+            }
+
+            // 3. 비네팅 효과
+            if (f.vignette > 0) {
+                const intensity = f.vignette / 100;
+                const outerRadius = Math.hypot(canvas.width, canvas.height) * 0.55;
+                const innerRadius = outerRadius * (1 - intensity * 0.65);
+                const grad = ctx.createRadialGradient(cx, cy, innerRadius, cx, cy, outerRadius);
+                grad.addColorStop(0, 'rgba(0, 0, 0, 0)');
+                grad.addColorStop(1, `rgba(0, 0, 0, ${clamp(intensity * 0.85, 0, 0.9)})`);
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+
+            // 4. 분위기/날씨 오버레이
+            if (ov.weather && ov.weather !== 'none') {
+                drawWeatherOverlay(ctx, canvas.width, canvas.height, ov.weather);
+            }
+
+            // 5. 프레임 / 레터박스
+            if (ov.frame && ov.frame !== 'none') {
+                drawFrameOverlay(ctx, canvas.width, canvas.height, ov.frame);
+            }
+
+            // 6. 다중 자막 & 스티커 레이어 렌더링
+            renderedLayerBounds = [];
+            const scaleFactor = Math.max(canvas.width, canvas.height) / 1000;
+
+            currentState.layers.forEach((layer) => {
+                if (!layer.text) return;
+                const lx = layer.xNorm * canvas.width;
+                const ly = layer.yNorm * canvas.height;
+                const fontSize = Math.max(14, Math.round(layer.size * scaleFactor));
+
+                ctx.save();
+                if (layer.type === 'sticker') {
+                    ctx.font = `${fontSize * 1.25}px "Noto Sans KR", "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(layer.text, lx, ly);
+
+                    const m = ctx.measureText(layer.text);
+                    const boxW = Math.max(fontSize * 1.2, m.width + 20);
+                    const boxH = fontSize * 1.3;
+                    renderedLayerBounds.push({
+                        id: layer.id,
+                        x: lx - boxW / 2,
+                        y: ly - boxH / 2,
+                        w: boxW,
+                        h: boxH
+                    });
+
+                    if (layer.id === selectedLayerId) {
+                        ctx.strokeStyle = '#60A5FA';
+                        ctx.lineWidth = Math.max(2, 2.5 * scaleFactor);
+                        ctx.setLineDash([6, 4]);
+                        ctx.strokeRect(lx - boxW / 2, ly - boxH / 2, boxW, boxH);
+                    }
+                } else {
+                    const fontStack = layer.fontFamily === 'serif'
+                        ? `"Noto Serif KR", Georgia, serif`
+                        : layer.fontFamily === 'mono'
+                            ? `ui-monospace, SFMono-Regular, Menlo, monospace`
+                            : `"Noto Sans KR", Inter, sans-serif`;
+
+                    ctx.font = `700 ${fontSize}px ${fontStack}`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+
+                    const metrics = ctx.measureText(layer.text);
+                    const textWidth = metrics.width;
+                    const padX = fontSize * 0.55;
+                    const padY = fontSize * 0.32;
+                    const boxW = textWidth + padX * 2;
+                    const boxH = fontSize + padY * 2;
+
+                    if (layer.hasBg) {
+                        ctx.fillStyle = 'rgba(11, 14, 20, 0.72)';
+                        roundRect(ctx, lx - boxW / 2, ly - boxH / 2, boxW, boxH, Math.min(18, fontSize * 0.35));
+                        ctx.fill();
+                    }
+
+                    ctx.shadowColor = 'rgba(0, 0, 0, 0.75)';
+                    ctx.shadowBlur = 8 * scaleFactor;
+                    ctx.shadowOffsetY = 2 * scaleFactor;
+                    ctx.fillStyle = layer.color || '#FFFFFF';
+                    ctx.fillText(layer.text, lx, ly);
+
+                    renderedLayerBounds.push({
+                        id: layer.id,
+                        x: lx - boxW / 2,
+                        y: ly - boxH / 2,
+                        w: boxW,
+                        h: boxH
+                    });
+
+                    if (layer.id === selectedLayerId) {
+                        ctx.shadowColor = 'transparent';
+                        ctx.strokeStyle = '#3B82F6';
+                        ctx.lineWidth = Math.max(2, 2.5 * scaleFactor);
+                        ctx.setLineDash([6, 4]);
+                        ctx.strokeRect(lx - boxW / 2 - 3, ly - boxH / 2 - 3, boxW + 6, boxH + 6);
+                    }
+                }
+                ctx.restore();
+            });
+
+            // 7. 브러시 마스크 미리보기 오버레이
+            if ((isBrushActive || hasMaskStrokes) && maskCanvas.width > 0 && maskCanvas.height > 0) {
+                ctx.save();
+                ctx.globalAlpha = 0.45;
+                ctx.drawImage(maskCanvas, 0, 0, canvas.width, canvas.height);
+                ctx.restore();
+            }
+
+            ctx.restore();
+
+            const hintBadge = document.getElementById('dragHintBadge');
+            if (currentState.layers.length > 0 && !isBrushActive) {
+                hintBadge.classList.remove('hidden');
+            } else {
+                hintBadge.classList.add('hidden');
+            }
+        }
+
+        function drawFrameOverlay(ctx, w, h, frameType) {
+            ctx.save();
+            if (frameType === 'letterbox') {
+                const barH = Math.round(h * 0.12);
+                ctx.fillStyle = '#05070B';
+                ctx.fillRect(0, 0, w, barH);
+                ctx.fillRect(0, h - barH, w, barH);
+            } else if (frameType === 'polaroid') {
+                const sidePad = Math.round(w * 0.05);
+                const topPad = Math.round(h * 0.05);
+                const bottomPad = Math.round(h * 0.16);
+                ctx.strokeStyle = '#F8FAFC';
+                ctx.lineWidth = sidePad * 2;
+                ctx.strokeRect(0, 0, w, h);
+                ctx.fillStyle = '#F8FAFC';
+                ctx.fillRect(0, 0, w, topPad);
+                ctx.fillRect(0, h - bottomPad, w, bottomPad);
+            } else if (frameType === 'white-border') {
+                const pad = Math.round(Math.min(w, h) * 0.035);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.92)';
+                ctx.lineWidth = pad * 2;
+                ctx.strokeRect(0, 0, w, h);
+            }
+            ctx.restore();
+        }
+
+        function drawWeatherOverlay(ctx, w, h, weatherType) {
+            ctx.save();
+            const scale = Math.max(w, h) / 1000;
+
+            if (weatherType === 'sunflare') {
+                const grad = ctx.createRadialGradient(w * 0.82, h * 0.16, 10, w * 0.82, h * 0.16, Math.max(w, h) * 0.65);
+                grad.addColorStop(0, 'rgba(255, 245, 200, 0.55)');
+                grad.addColorStop(0.35, 'rgba(255, 195, 95, 0.22)');
+                grad.addColorStop(1, 'rgba(255, 170, 60, 0)');
+                ctx.globalCompositeOperation = 'screen';
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, w, h);
+            } else if (weatherType === 'snow') {
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.82)';
+                weatherParticles.forEach(p => {
+                    const x = p.rx * w;
+                    const y = p.ry * h;
+                    const r = (2.5 + p.size * 3) * scale;
+                    ctx.beginPath();
+                    ctx.arc(x, y, r, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+            } else if (weatherType === 'rain') {
+                ctx.strokeStyle = 'rgba(186, 230, 253, 0.45)';
+                ctx.lineWidth = Math.max(1, 1.5 * scale);
+                weatherParticles.forEach(p => {
+                    const x = p.rx * w;
+                    const y = p.ry * h;
+                    const len = (18 + p.size * 14) * scale;
+                    ctx.beginPath();
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(x - len * 0.22, y + len);
+                    ctx.stroke();
+                });
+            } else if (weatherType === 'sakura') {
+                weatherParticles.slice(0, 55).forEach(p => {
+                    const x = p.rx * w;
+                    const y = p.ry * h;
+                    const r = (5 + p.size * 4) * scale;
+                    ctx.save();
+                    ctx.translate(x, y);
+                    ctx.rotate(p.angle * 4);
+                    ctx.fillStyle = 'rgba(249, 168, 212, 0.78)';
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, r, r * 0.58, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                });
+            }
+            ctx.restore();
+        }
+
+        function roundRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.arcTo(x + width, y, x + width, y + height, radius);
+            ctx.arcTo(x + width, y + height, x, y + height, radius);
+            ctx.arcTo(x, y + height, x, y, radius);
+            ctx.arcTo(x, y, x + width, y, radius);
+            ctx.closePath();
+        }
+
+        // 브러시 마스크 제어
+        function toggleBrushMask() {
+            isBrushActive = !isBrushActive;
+            const btn = document.getElementById('btnBrushToggle');
+            const clearBtn = document.getElementById('btnClearMask');
+            const brushBadge = document.getElementById('brushHintBadge');
+
+            if (isBrushActive) {
+                btn.className = "px-2.5 py-1 rounded-lg bg-pink-600/30 border border-pink-500 text-[11px] text-pink-200 font-semibold transition flex items-center gap-1";
+                clearBtn.classList.remove('hidden');
+                brushBadge.classList.remove('hidden');
+                canvas.style.cursor = 'crosshair';
+            } else {
+                btn.className = "px-2.5 py-1 rounded-lg bg-editor-card hover:bg-gray-800 border border-editor-border text-[11px] text-gray-300 transition flex items-center gap-1";
+                brushBadge.classList.add('hidden');
+                canvas.style.cursor = 'default';
+            }
+            renderCanvas();
+        }
+
+        function clearBrushMask(shouldRender = true) {
+            maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
+            hasMaskStrokes = false;
+            if (!isBrushActive) {
+                document.getElementById('btnClearMask').classList.add('hidden');
+            }
+            if (shouldRender) renderCanvas();
+        }
+
+        function paintMaskAtClientPos(clientX, clientY) {
+            const pos = clientToCanvasCoords(clientX, clientY);
+            const mx = (pos.x / canvas.width) * maskCanvas.width;
+            const my = (pos.y / canvas.height) * maskCanvas.height;
+            const brushRadius = Math.max(18, Math.min(maskCanvas.width, maskCanvas.height) * 0.045);
+
+            maskCtx.save();
+            maskCtx.fillStyle = 'rgba(236, 72, 153, 0.85)';
+            maskCtx.beginPath();
+            maskCtx.arc(mx, my, brushRadius, 0, Math.PI * 2);
+            maskCtx.fill();
+            maskCtx.restore();
+            hasMaskStrokes = true;
+            renderCanvas();
+        }
+
+        // 캔버스 위 레이어 드래그 & 브러시 인터랙션
+        function clientToCanvasCoords(clientX, clientY) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / (rect.width || 1);
+            const scaleY = canvas.height / (rect.height || 1);
+            return {
+                x: (clientX - rect.left) * scaleX,
+                y: (clientY - rect.top) * scaleY
+            };
+        }
+
+        function setupCanvasInteractions() {
+            const onPointerDown = (clientX, clientY) => {
+                if (isComparingOriginal) return;
+
+                if (isBrushActive) {
+                    isDrawingMask = true;
+                    paintMaskAtClientPos(clientX, clientY);
+                    return;
+                }
+
+                const pt = clientToCanvasCoords(clientX, clientY);
+                for (let i = renderedLayerBounds.length - 1; i >= 0; i--) {
+                    const b = renderedLayerBounds[i];
+                    if (pt.x >= b.x && pt.x <= b.x + b.w && pt.y >= b.y && pt.y <= b.y + b.h) {
+                        selectedLayerId = b.id;
+                        isDraggingLayer = true;
+                        const layer = currentState.layers.find(l => l.id === b.id);
+                        dragOffsetX = pt.x - (layer.xNorm * canvas.width);
+                        dragOffsetY = pt.y - (layer.yNorm * canvas.height);
+                        syncLayersListUI();
+                        renderCanvas();
+                        return;
+                    }
+                }
+            };
+
+            const onPointerMove = (clientX, clientY) => {
+                if (isBrushActive && isDrawingMask) {
+                    paintMaskAtClientPos(clientX, clientY);
+                    return;
+                }
+
+                if (isDraggingLayer && selectedLayerId) {
+                    const pt = clientToCanvasCoords(clientX, clientY);
+                    const layer = currentState.layers.find(l => l.id === selectedLayerId);
+                    if (layer) {
+                        layer.xNorm = clamp((pt.x - dragOffsetX) / canvas.width, 0.05, 0.95);
+                        layer.yNorm = clamp((pt.y - dragOffsetY) / canvas.height, 0.05, 0.95);
+                        renderCanvas();
+                    }
+                }
+            };
+
+            const onPointerUp = () => {
+                if (isBrushActive && isDrawingMask) {
+                    isDrawingMask = false;
+                    return;
+                }
+                if (isDraggingLayer) {
+                    isDraggingLayer = false;
+                    commitHistory("레이어 위치 이동");
+                }
+            };
+
+            canvas.addEventListener('mousedown', (e) => onPointerDown(e.clientX, e.clientY));
+            window.addEventListener('mousemove', (e) => onPointerMove(e.clientX, e.clientY));
+            window.addEventListener('mouseup', onPointerUp);
+
+            canvas.addEventListener('touchstart', (e) => {
+                if (e.touches.length > 0) {
+                    onPointerDown(e.touches[0].clientX, e.touches[0].clientY);
+                }
+            }, { passive: true });
+            window.addEventListener('touchmove', (e) => {
+                if (e.touches.length > 0 && (isDraggingLayer || isDrawingMask)) {
+                    onPointerMove(e.touches[0].clientX, e.touches[0].clientY);
+                }
+            }, { passive: true });
+            window.addEventListener('touchend', onPointerUp);
+        }
+
+        // ==========================================
+        // 4. 직접 픽셀 편집 라우터 + AI / 로컬 시뮬레이션 엔진
         // ==========================================
         function applyQuickPrompt(promptText, forceGenerative = false) {
             document.getElementById('commandInput').value = promptText;
@@ -1015,18 +1484,30 @@
         }
 
         /**
-         * 의상 탈의/교체, 소품 제거, 손 동작/포즈, 배경/장면 변경 여부를 즉시 판별하여
-         * 느린 텍스트 파서나 로컬 필터 우회를 완전히 차단하고 픽셀 생성 파이프라인으로 직행시킵니다.
+         * 의상 탈의/교체("옷을 벗겨줘", "가디건 벗겨줘", "상의 바꿔줘" 등),
+         * 사물 제거("핸드폰 없애줘"), 손동작/포즈, 표정, 배경 변경 명령 감지
          */
         function shouldRunDirectPixelEdit(userCommand, forceGenerative = false) {
-            if (forceGenerative) return true;
-            const pixelEditPattern = /(가디건|겉옷|자켓|재킷|코트|패딩|니트|상의|하의|바지|치마|원피스|옷|의상|착장|모자|안경|선글라스|귀걸이|목걸이|가방|핸드폰|스마트폰|폰|소품|물건|사물|손\s*동작|손동작|손가락|포즈|자세|표정|얼굴|헤어|머리|배경|풍경|바다|산|하늘|밤거리|한강|벗겨|벗기|탈의|없애|지워|삭제|제거|빼줘|바꿔줘|교체|합성)/i;
-            return pixelEditPattern.test(userCommand);
+            if (forceGenerative || hasMaskStrokes) return true;
+            const pixelPattern = /(옷을?\s*벗겨|옷\s*벗기|가디건|겉옷|자켓|재킷|코트|패딩|니트|상의|하의|바지|치마|원피스|반팔|민소매|의상|착장|모자|안경|선글라스|귀걸이|목걸이|가방|핸드폰|스마트폰|폰|소품|물건|사물|손\s*동작|손동작|손가락|포즈|자세|브이|표정|얼굴|웃는|헤어|머리|배경|풍경|바다|산|하늘|밤거리|한강|없애|지워|삭제|제거|빼줘|바꿔줘|교체|합성)/i;
+            return pixelPattern.test(userCommand);
+        }
+
+        function buildDirectPixelPrompt(userCommand) {
+            if (/(옷|가디건|겉옷|자켓|재킷|코트|패딩|니트|상의|의상|반팔|민소매)/.test(userCommand) && /(벗겨|벗기|탈의|없애|지워|제거|빼|바꿔|교체)/.test(userCommand)) {
+                return `Edit this photo naturally according to the clothing instruction while keeping the person's identity, face, hair, body proportions, skin tone, lighting, and background consistent. Where outerwear or layers are removed or changed, render a natural, neat, everyday inner shirt/top or clean shoulder/arm appearance that fits the scene seamlessly without nudity or inappropriate content. If a pink/magenta brush mask region is provided in the reference, focus edits on that marked area. User instruction: ${userCommand}`;
+            }
+            if (/(핸드폰|스마트폰|폰)/.test(userCommand) && /(없애|지워|삭제|제거|빼)/.test(userCommand)) {
+                return `Edit this photo naturally to cleanly remove the smartphone/phone being held by the person, reconstructing the hand, fingers, clothing, and background seamlessly. User instruction: ${userCommand}`;
+            }
+            if (/(손\s*동작|손동작|손가락|포즈|자세|브이)/.test(userCommand)) {
+                return `Edit this photo naturally so the person's hand gesture/pose matches the requested action while preserving the person's face, identity, clothing, lighting, and overall composition. User instruction: ${userCommand}`;
+            }
+            return `Edit the pixels of this image directly and naturally according to the user's instruction while preserving key subject consistency and photorealistic quality. User instruction: ${userCommand}`;
         }
 
         function dismissPixelError() {
             document.getElementById('aiErrorPanel').classList.add('hidden');
-            lastFailedPixelRequest = null;
         }
 
         async function retryLastPixelEdit() {
@@ -1036,23 +1517,72 @@
             await runDirectPixelEditingPipeline(command, prompt);
         }
 
-        function buildDirectPixelPrompt(userCommand) {
-            const lower = userCommand.toLowerCase();
-            if (/(가디건|겉옷|자켓|재킷|코트|패딩|니트|옷|의상)/.test(userCommand) && /(벗겨|벗기|탈의|없애|지워|제거|빼)/.test(userCommand)) {
-                return `Edit this photo naturally to remove the outer cardigan/outerwear/jacket while keeping the person's identity, face, hair, body proportions, skin tone, lighting, and background consistent. Where the outer cardigan/layer is removed, render a natural, neat, everyday inner top/shirt or clean shoulder/arm appearance that fits the scene seamlessly without nudity or inappropriate content. User instruction: ${userCommand}`;
+        /**
+         * API 키 미설정 또는 호출 실패 시 사용자가 즉시 테스트할 수 있는 로컬 픽셀 시뮬레이션
+         * (밝기만 슬그머니 올리는 대신 브러시 마스크 영역 리페인트/톤블렌딩 또는 영역 픽셀 처리를 수행하고
+         *  로컬 시뮬레이션임을 명시합니다.)
+         */
+        function runLocalPixelFallback() {
+            const cmd = lastFailedPixelRequest?.command || document.getElementById('commandInput').value.trim() || "로컬 픽셀 시뮬레이션";
+            dismissPixelError();
+
+            const workCanvas = document.createElement('canvas');
+            workCanvas.width = baseImage.width;
+            workCanvas.height = baseImage.height;
+            const wCtx = workCanvas.getContext('2d');
+            wCtx.drawImage(baseImage, 0, 0);
+
+            if (hasMaskStrokes) {
+                // 사용자가 칠한 영역을 주변 픽셀 블러/클론 블렌딩으로 국소 리페인트 시뮬레이션
+                const patchCanvas = document.createElement('canvas');
+                patchCanvas.width = workCanvas.width;
+                patchCanvas.height = workCanvas.height;
+                const pCtx = patchCanvas.getContext('2d');
+                pCtx.filter = 'blur(18px)';
+                pCtx.drawImage(baseImage, 0, 0);
+
+                const tempMask = document.createElement('canvas');
+                tempMask.width = workCanvas.width;
+                tempMask.height = workCanvas.height;
+                const mCtx = tempMask.getContext('2d');
+                mCtx.drawImage(maskCanvas, 0, 0, tempMask.width, tempMask.height);
+                mCtx.globalCompositeOperation = 'source-in';
+                mCtx.drawImage(patchCanvas, 0, 0);
+
+                wCtx.drawImage(tempMask, 0, 0);
+                clearBrushMask(false);
+            } else {
+                // 브러시 영역이 없을 경우 중앙 상반신/소품 영역 국소 픽셀 블렌딩 시뮬레이션
+                const regionW = Math.round(workCanvas.width * 0.28);
+                const regionH = Math.round(workCanvas.height * 0.32);
+                const rx = Math.round((workCanvas.width - regionW) / 2);
+                const ry = Math.round(workCanvas.height * 0.45);
+
+                wCtx.save();
+                wCtx.filter = 'blur(16px) saturate(1.15)';
+                wCtx.drawImage(baseImage, rx, ry, regionW, regionH, rx, ry, regionW, regionH);
+                wCtx.restore();
             }
-            if (/(핸드폰|스마트폰|폰)/.test(userCommand) && /(없애|지워|삭제|제거|빼)/.test(userCommand)) {
-                return `Edit this photo naturally to cleanly remove the smartphone/phone being held by the person, reconstructing the hand, fingers, clothing, and background behind it naturally and seamlessly. User instruction: ${userCommand}`;
-            }
-            if (/(손\s*동작|손동작|손가락|포즈|자세)/.test(userCommand)) {
-                return `Edit this photo naturally so the person's hand gesture/pose matches the requested action while preserving the person's face, identity, clothing, lighting, and overall composition. User instruction: ${userCommand}`;
-            }
-            return `Edit the pixels of this image directly and naturally according to the user's instruction while preserving key subject consistency and photorealistic quality. User instruction: ${userCommand}`;
+
+            const resultUrl = workCanvas.toDataURL('image/png');
+            const nextImg = new Image();
+            nextImg.onload = () => {
+                baseImage = nextImg;
+                currentState.imageSrc = resultUrl;
+                currentState.aiLayers = [{
+                    name: "로컬 픽셀 시뮬레이션 적용",
+                    detail: `${cmd} (API 미연결/실패 대체)`,
+                    active: true
+                }];
+                lastFailedPixelRequest = null;
+                syncUIWithState();
+                renderCanvas();
+                commitHistory(`로컬 픽셀 시뮬레이션: ${cmd}`);
+                showToast("로컬 픽셀 시뮬레이션이 적용되었습니다. (실제 AI 생성은 API 키 연결 시 동작)", "info");
+            };
+            nextImg.src = resultUrl;
         }
 
-        /**
-         * 생성형 픽셀 편집 전용 파이프라인 (필터/밝기/자막 우회 절대 금지, 실패 시 원인 안내 및 재시도)
-         */
         async function runDirectPixelEditingPipeline(userCommand, customPrompt = null) {
             const promptToSend = customPrompt || buildDirectPixelPrompt(userCommand);
             lastFailedPixelRequest = { command: userCommand, prompt: promptToSend };
@@ -1069,8 +1599,11 @@
                     const newImg = new Image();
                     newImg.onload = () => {
                         baseImage = newImg;
+                        maskCanvas.width = Math.max(1, newImg.width);
+                        maskCanvas.height = Math.max(1, newImg.height);
+                        clearBrushMask(false);
+
                         currentState.imageSrc = editedDataUrl;
-                        // 픽셀 재생성 시 기존 구도/비율/필터와 충돌하지 않도록 베이스 동기화
                         currentState.transform.aspectRatio = "original";
                         currentState.transform.rotation = 0;
                         currentState.transform.flipH = false;
@@ -1106,16 +1639,16 @@
 
         function interpretPixelEditError(err) {
             const msg = String(err?.message || err || "");
-            if (/SAFETY|PROHIBITED_CONTENT|BLOCKED|안전|차단/i.test(msg)) {
+            if (!apiKey) {
+                return `현재 API 키가 설정되지 않아 외부 Gemini 픽셀 모델을 호출할 수 없습니다. [로컬 픽셀 시뮬레이션 적용]으로 국소 픽셀 편집을 테스트하거나 API 키를 연결해주세요.`;
+            }
+            if (/SAFETY|PROHIBITED_CONTENT|IMAGE_SAFETY|차단/i.test(msg)) {
                 return `안전 정책 필터에 의해 이미지 픽셀 재생성이 차단되었습니다. (${msg}) 다른 표현이나 다른 샘플 이미지로 다시 시도해보세요.`;
             }
             if (/429|quota|RESOURCE_EXHAUSTED|한도/i.test(msg)) {
-                return `API 요청 한도(Quota) 또는 동시 처리 제한에 도달했습니다. 잠시 후 [즉시 재시도]를 눌러주세요.`;
+                return `API 요청 한도(Quota)에 도달했습니다. 잠시 후 [즉시 재시도]를 눌러주세요.`;
             }
-            if (/401|403|API key|PERMISSION_DENIED|권한/i.test(msg)) {
-                return `이미지 편집 모델 호출 권한 또는 API 키 설정을 확인해주세요. (${msg})`;
-            }
-            return `${msg || "알 수 없는 이유로 픽셀 생성에 실패했습니다."} [즉시 재시도] 버튼으로 다시 요청할 수 있습니다.`;
+            return `${msg || "알 수 없는 이유로 픽셀 생성에 실패했습니다."} [즉시 재시도] 또는 [로컬 픽셀 시뮬레이션 적용]을 눌러주세요.`;
         }
 
         async function executeAICommand(forceGenerative = false) {
@@ -1127,21 +1660,20 @@
                 return;
             }
 
-            // 1) 의상 탈의/제거, 소품 제거, 손 동작, 배경/장면 변경 명령은 즉시 픽셀 편집 파이프라인으로 직행
+            // 의상/겉옷/가디건/핸드폰/손동작/배경 명령은 즉시 픽셀 편집 파이프라인으로 직행
             if (shouldRunDirectPixelEdit(userCommand, forceGenerative)) {
                 await runDirectPixelEditingPipeline(userCommand);
                 return;
             }
 
-            // 2) 그 외 색보정·자막·비율·프레임·날씨 명령 처리
+            // 색보정·비율·프레임·날씨·자막 명령 처리
             setLoading(true, "AI가 명령어를 해석하고 있습니다...", `"${userCommand}"`);
 
             let parsedPlan = null;
-
             try {
-                parsedPlan = await analyzeCommandWithGemini(userCommand, false);
+                if (!apiKey) throw new Error("No API key");
+                parsedPlan = await analyzeCommandWithGemini(userCommand);
             } catch (apiErr) {
-                console.warn("Gemini API 파싱 대체(로컬 한국어 자연어 엔진 가동):", apiErr);
                 parsedPlan = parseKoreanCommandLocally(userCommand, false);
             }
 
@@ -1159,7 +1691,6 @@
                     return;
                 }
 
-                // 4단계: 색보정 필터 파라미터 반영
                 if (parsedPlan.filters) {
                     const f = parsedPlan.filters;
                     if (typeof f.brightness === 'number') currentState.filters.brightness = clamp(f.brightness, 30, 200);
@@ -1173,7 +1704,6 @@
                     if (typeof f.vignette === 'number') currentState.filters.vignette = clamp(f.vignette, 0, 100);
                 }
 
-                // 5단계: 구도 및 기하 변형 (비율, 회전, 반전, 줌)
                 if (parsedPlan.transform) {
                     const tr = parsedPlan.transform;
                     if (tr.aspectRatio) currentState.transform.aspectRatio = tr.aspectRatio;
@@ -1185,13 +1715,11 @@
                     if (typeof tr.zoom === 'number') currentState.transform.zoom = clamp(tr.zoom, 100, 200);
                 }
 
-                // 6단계: 프레임 및 날씨 오버레이 반영
                 if (parsedPlan.overlays) {
                     if (parsedPlan.overlays.frame) currentState.overlays.frame = parsedPlan.overlays.frame;
                     if (parsedPlan.overlays.weather) currentState.overlays.weather = parsedPlan.overlays.weather;
                 }
 
-                // 7단계: 자막 / 텍스트 레이어 추가·수정·삭제
                 if (parsedPlan.textAction) {
                     const ta = parsedPlan.textAction;
                     if (ta.action === 'remove_all') {
@@ -1215,7 +1743,6 @@
                     }
                 }
 
-                // 8단계: 스티커 추가
                 if (Array.isArray(parsedPlan.stickersToAdd)) {
                     parsedPlan.stickersToAdd.forEach((emoji, idx) => {
                         const newId = 'sticker_' + Date.now() + '_' + idx;
@@ -1234,98 +1761,50 @@
                     });
                 }
 
-                // 9단계: AI 적용 효과 레이어 목록 업데이트
-                if (Array.isArray(parsedPlan.appliedEffects) && parsedPlan.appliedEffects.length > 0) {
-                    currentState.aiLayers = parsedPlan.appliedEffects;
-                } else {
-                    currentState.aiLayers = [{ name: "AI 스마트 명령 실행", detail: userCommand, active: true }];
-                }
+                currentState.aiLayers = Array.isArray(parsedPlan.appliedEffects) && parsedPlan.appliedEffects.length > 0
+                    ? parsedPlan.appliedEffects
+                    : [{ name: "AI 스마트 명령 실행", detail: userCommand, active: true }];
 
                 syncUIWithState();
                 renderCanvas();
                 commitHistory(`AI: ${userCommand}`);
                 inputEl.value = "";
-
-                const summaryText = currentState.aiLayers.map(e => e.name).join(', ');
-                showToast(`편집 완료: ${summaryText}`, "success");
-
-            } catch (finalErr) {
-                console.error("Execution Error:", finalErr);
-                showToast("명령을 적용했습니다.", "info");
+                showToast(`편집 완료: ${currentState.aiLayers.map(e => e.name).join(', ')}`, "success");
             } finally {
                 setLoading(false);
             }
         }
 
-        /**
-         * Gemini Image Editing (Image-to-Image) 호출 (다중 모델 폴백 및 상세 오류 전파)
-         */
-        async function editImageWithGemini(promptText) {
-            const maxDim = 1024;
-            const scale = Math.min(1, maxDim / Math.max(baseImage.width || 1024, baseImage.height || 1024));
-            const offscreen = document.createElement('canvas');
-            offscreen.width = Math.max(1, Math.round(baseImage.width * scale));
-            offscreen.height = Math.max(1, Math.round(baseImage.height * scale));
-            offscreen.getContext('2d').drawImage(baseImage, 0, 0, offscreen.width, offscreen.height);
-            const base64Data = offscreen.toDataURL('image/jpeg', 0.92).split(',')[1];
+        async function analyzeCommandWithGemini(userCommand) {
+            const systemInstruction = `You are Command Edit AI, an expert Korean photo editing intent parser.
+Return ONLY strict JSON matching the schema with no markdown fences.`;
 
             const payload = {
+                systemInstruction: { parts: [{ text: systemInstruction }] },
                 contents: [{
                     role: "user",
-                    parts: [
-                        { text: promptText },
-                        {
-                            inlineData: {
-                                mimeType: "image/jpeg",
-                                data: base64Data
-                            }
-                        }
-                    ]
+                    parts: [{ text: `User Korean command: "${userCommand}"` }]
                 }],
                 generationConfig: {
-                    responseModalities: ['TEXT', 'IMAGE']
-                }
-            };
-
-            let lastError = null;
-            for (const modelName of IMAGE_MODELS) {
-                try {
-                    const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
-                    const response = await fetchWithRetry(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    }, 1);
-
-                    const result = await response.json();
-                    const candidate = result?.candidates?.[0];
-                    const blockReason = result?.promptFeedback?.blockReason || candidate?.finishReason;
-
-                    if (blockReason === 'SAFETY' || blockReason === 'PROHIBITED_CONTENT' || blockReason === 'IMAGE_SAFETY') {
-                        throw new Error(`SAFETY 차단 (${blockReason})`);
-                    }
-
-                    const parts = candidate?.content?.parts || [];
-                    const imgPart = parts.find(p => p.inlineData || p.inline_data);
-                    const inlineObj = imgPart?.inlineData || imgPart?.inline_data;
-
-                    if (inlineObj && inlineObj.data) {
-                        const mime = inlineObj.mimeType || inlineObj.mime_type || "image/png";
-                        return `data:${mime};base64,${inlineObj.data}`;
-                    }
-
-                    const textOnly = parts.map(p => p.text).filter(Boolean).join(" ").trim();
-                    lastError = new Error(textOnly ? `이미지가 반환되지 않았습니다: ${textOnly}` : `${modelName} 응답에 이미지 데이터가 없습니다.`);
-                } catch (err) {
-                    lastError = err;
-                    if (/SAFETY|PROHIBITED_CONTENT|IMAGE_SAFETY/i.test(String(err?.message || ""))) {
-                        throw err;
-                    }
-                }
-            }
-
-            throw lastError || new Error("이미지 편집 모델에서 유효한 이미지를 받지 못했습니다.");
-        }
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            requiresGenerativeImage: { type: "BOOLEAN" },
+                            generativePrompt: { type: "STRING" },
+                            filters: {
+                                type: "OBJECT",
+                                properties: {
+                                    brightness: { type: "NUMBER" },
+                                    contrast: { type: "NUMBER" },
+                                    saturate: { type: "NUMBER" },
+                                    warmth: { type: "NUMBER" },
+                                    sepia: { type: "NUMBER" },
+                                    grayscale: { type: "NUMBER" },
+                                    invert: { type: "NUMBER" },
+                                    blur: { type: "NUMBER" },
+                                    vignette: { type: "NUMBER" }
+                                }
                             },
                             transform: {
                                 type: "OBJECT",
@@ -1382,7 +1861,7 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
-            }, 1); // 빠른 응답 및 폴백을 위해 재시도 1회 제한
+            }, 1);
 
             const result = await response.json();
             const rawText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -1390,10 +1869,6 @@
             return JSON.parse(rawText);
         }
 
-        /**
-         * 내장 한국어 자연어 명령어 해석 엔진 (Zero-Failure Local NLP Fallback)
-         * 네트워크 오류나 API 한도 초과 시에도 사용자가 입력한 거의 모든 한국어 편집 명령을 정확히 분석하여 실행
-         */
         function parseKoreanCommandLocally(cmd, forceGenerative = false) {
             const text = cmd.trim();
             const filters = { ...currentState.filters };
@@ -1414,7 +1889,6 @@
                 return { resetAll: true, requiresGenerativeImage: false, filters, transform, overlays, textAction, stickersToAdd, appliedEffects };
             }
 
-            // 1. 밝기 / 선명 / 화사 / 톤 보정
             if (/맑고|화사|밝게|환하게|햇살|밝기\s*올/.test(text)) {
                 filters.brightness = Math.min(200, filters.brightness + 20);
                 filters.saturate = Math.min(220, filters.saturate + 18);
@@ -1424,15 +1898,13 @@
             if (/어둡게|어두운|톤\s*다운|낮춰|밤/.test(text)) {
                 filters.brightness = Math.max(30, filters.brightness - 22);
                 filters.contrast = Math.min(200, filters.contrast + 12);
-                appliedEffects.push({ name: "로우는 톤 다운", detail: "명도 하향 및 깊이감 강조", active: true });
+                appliedEffects.push({ name: "톤 다운", detail: "명도 하향 및 깊이감 강조", active: true });
             }
             if (/선명|또렷|대비|샤픈|쨍하게/.test(text)) {
                 filters.contrast = Math.min(200, filters.contrast + 24);
                 filters.saturate = Math.min(220, filters.saturate + 12);
                 appliedEffects.push({ name: "선명도 & 대비 강화", detail: "디테일 콘트라스트 부스트", active: true });
             }
-
-            // 2. 색온도 (따뜻함 / 차가움)
             if (/따뜻|노을|황혼|포근|웜톤|오렌지|봄/.test(text)) {
                 filters.warmth = Math.min(50, filters.warmth + 26);
                 appliedEffects.push({ name: "따뜻한 웜톤 색온도", detail: "골든아워 앰버 색조 적용", active: true });
@@ -1441,8 +1913,6 @@
                 filters.warmth = Math.max(-50, filters.warmth - 26);
                 appliedEffects.push({ name: "차가운 쿨톤 색온도", detail: "블루 스틸 색조 적용", active: true });
             }
-
-            // 3. 스타일 프리셋 (시네마틱, 빈티지, 흑백, 반전, 블러, 비네팅)
             if (/시네마|영화|웅장/.test(text)) {
                 filters.contrast = Math.min(200, Math.max(filters.contrast, 122));
                 filters.vignette = Math.max(filters.vignette, 42);
@@ -1453,33 +1923,13 @@
                 filters.contrast = 94;
                 filters.warmth = Math.max(filters.warmth, 18);
                 filters.vignette = Math.max(filters.vignette, 30);
-                appliedEffects.push({ name: "빈티지 필름 룩", detail: "아날로그 세피아 & 필름 그레인 톤", active: true });
+                appliedEffects.push({ name: "빈티지 필름 룩", detail: "아날로그 세피아 톤", active: true });
             }
             if (/흑백|모노|그레이/.test(text)) {
                 filters.grayscale = 100;
                 filters.contrast = Math.max(filters.contrast, 118);
                 appliedEffects.push({ name: "클래식 흑백 모노톤", detail: "고대비 흑백 변환", active: true });
             }
-            if (/반전|네거티브/.test(text) && !/좌우|상하/.test(text)) {
-                filters.invert = filters.invert > 50 ? 0 : 100;
-                appliedEffects.push({ name: "색상 반전 (Invert)", detail: "네거티브 컬러 반전", active: true });
-            }
-            if (/블러|흐리게|흐릿|몽환|뿌옇게/.test(text)) {
-                filters.blur = Math.max(filters.blur, 3.5);
-                appliedEffects.push({ name: "소프트 블러 효과", detail: "몽환적 가우시안 블러", active: true });
-            }
-            if (/뽀샤시|피부|인물|부드럽/.test(text)) {
-                filters.brightness = Math.min(200, filters.brightness + 14);
-                filters.contrast = 93;
-                filters.blur = 0.6;
-                appliedEffects.push({ name: "소프트 인물 보정", detail: "화사한 피부톤 스무딩", active: true });
-            }
-            if (/비네팅|테두리\s*어둡/.test(text)) {
-                filters.vignette = Math.max(filters.vignette, 55);
-                appliedEffects.push({ name: "비네팅 포커스", detail: "주변부 감성 비네팅", active: true });
-            }
-
-            // 4. 비율 크롭 / 회전 / 좌우반전 / 상하반전 / 확대
             if (/1\s*:\s*1|정사각형|인스타/.test(text)) {
                 transform.aspectRatio = "1:1";
                 appliedEffects.push({ name: "1:1 정사각형 크롭", detail: "피드 최적화 비율", active: true });
@@ -1494,28 +1944,6 @@
                 appliedEffects.push({ name: "4:3 클래식 크롭", detail: "표준 사진 비율", active: true });
             }
 
-            if (/왼쪽.*회전|반시계/.test(text)) {
-                transform.rotationDelta = -90;
-                appliedEffects.push({ name: "왼쪽 90° 회전", detail: "반시계 방향 회전", active: true });
-            } else if (/회전|돌려/.test(text)) {
-                transform.rotationDelta = 90;
-                appliedEffects.push({ name: "오른쪽 90° 회전", detail: "시계 방향 회전", active: true });
-            }
-
-            if (/좌우\s*반전|거울/.test(text)) {
-                transform.flipH = !transform.flipH;
-                appliedEffects.push({ name: "좌우 반전", detail: "수평 미러링 적용", active: true });
-            }
-            if (/상하\s*반전|뒤집/.test(text)) {
-                transform.flipV = !transform.flipV;
-                appliedEffects.push({ name: "상하 반전", detail: "수직 플립 적용", active: true });
-            }
-            if (/확대|줌\s*인|크게/.test(text)) {
-                transform.zoom = Math.min(200, transform.zoom + 25);
-                appliedEffects.push({ name: "줌 인 (확대)", detail: `${transform.zoom}% 클로즈업`, active: true });
-            }
-
-            // 5. 프레임 & 날씨 효과
             if (/레터박스|영화\s*바|위아래\s*검은/.test(text)) {
                 overlays.frame = "letterbox";
                 appliedEffects.push({ name: "시네마틱 레터박스", detail: "상하단 와이드 시네마 바", active: true });
@@ -1541,64 +1969,20 @@
                 appliedEffects.push({ name: "흩날리는 벚꽃 잎", detail: "봄날 벚꽃 파티클 오버레이", active: true });
             }
 
-            // 6. 스티커 추출
-            if (/벚꽃/.test(text) && /스티커/.test(text)) stickersToAdd.push("🌸");
-            if (/반짝|별/.test(text)) stickersToAdd.push("✨");
-            if (/하트|사랑/.test(text)) stickersToAdd.push("❤️");
-            if (/불꽃|핫/.test(text)) stickersToAdd.push("🔥");
-            if (/선글라스|힙/.test(text)) stickersToAdd.push("😎");
-            if (stickersToAdd.length > 0) {
-                appliedEffects.push({ name: `스티커 추가 (${stickersToAdd.join(' ')})`, detail: "드래그로 위치 이동 가능", active: true });
+            const quoteMatch = text.match(/['"‘“]([^'"’”]+)['"’”]/);
+            if (quoteMatch && quoteMatch[1]) {
+                textAction = {
+                    action: "add",
+                    text: quoteMatch[1],
+                    position: /우측\s*하단/.test(text) ? "bottom-right" : (/상단/.test(text) ? "top-center" : "bottom-center"),
+                    fontFamily: "sans",
+                    color: "#FFFFFF",
+                    fontSize: 40,
+                    hasBg: true
+                };
+                appliedEffects.push({ name: `자막 추가: "${quoteMatch[1]}"`, detail: "드래그로 위치 이동 가능", active: true });
             }
 
-            // 7. 자막 / 텍스트 추출
-            if (/자막.*(삭제|지워|없애)|텍스트.*(삭제|지워)/.test(text)) {
-                textAction = { action: "remove_all" };
-                appliedEffects.push({ name: "자막 레이어 전체 삭제", detail: "모든 텍스트 제거", active: true });
-            } else if (/자막|텍스트|글자|문구|써줘|넣어줘|추가/.test(text)) {
-                // 따옴표 안의 문구 우선 추출
-                const quoteMatch = text.match(/['"‘“]([^'"’”]+)['"’”]/);
-                let extractedText = quoteMatch ? quoteMatch[1] : "";
-
-                if (!extractedText) {
-                    // "~라고 써줘", "~ 자막" 패턴 추출
-                    const beforeKeyword = text.match(/(?:하단에|상단에|중앙에|우측에|좌측에|에)\s*([가-힣a-zA-Z0-9\s#!?.,-]+?)\s*(?:자막|텍스트|문구|라고)/);
-                    if (beforeKeyword && beforeKeyword[1]) {
-                        extractedText = beforeKeyword[1].trim();
-                    }
-                }
-
-                if (extractedText) {
-                    let pos = "bottom-center";
-                    if (/우측\s*하단|오른쪽\s*아래/.test(text)) pos = "bottom-right";
-                    else if (/좌측\s*하단|왼쪽\s*아래/.test(text)) pos = "bottom-left";
-                    else if (/상단|위쪽|맨\s*위/.test(text)) pos = "top-center";
-                    else if (/중앙|가운데/.test(text) && !/하단|상단/.test(text)) pos = "center";
-
-                    let color = "#FFFFFF";
-                    if (/노란|노랑|골드/.test(text)) color = "#FDE047";
-                    else if (/검정|검은/.test(text)) color = "#111827";
-                    else if (/분홍|핑크/.test(text)) color = "#F472B6";
-                    else if (/하늘|파란/.test(text)) color = "#60A5FA";
-
-                    let fontFamily = "sans";
-                    if (/명조|감성|시/.test(text)) fontFamily = "serif";
-                    else if (/필름|날짜|코드/.test(text)) fontFamily = "mono";
-
-                    textAction = {
-                        action: "add",
-                        text: extractedText,
-                        position: pos,
-                        fontFamily,
-                        color,
-                        fontSize: 40,
-                        hasBg: !/배경\s*없/.test(text)
-                    };
-                    appliedEffects.push({ name: `자막 추가: "${extractedText}"`, detail: `${pos} 배치 (드래그 이동 가능)`, active: true });
-                }
-            }
-
-            // 아무 키워드도 매칭되지 않았을 때 기본 스마트 톤업 보정 적용
             if (appliedEffects.length === 0) {
                 filters.brightness = Math.min(200, filters.brightness + 10);
                 filters.contrast = Math.min(200, filters.contrast + 12);
@@ -1632,52 +2016,84 @@
             }
         }
 
-        /**
-         * Gemini Image Editing (Image-to-Image) 호출
-         */
         async function editImageWithGemini(promptText) {
+            const maxDim = 1024;
+            const scale = Math.min(1, maxDim / Math.max(baseImage.width || 1024, baseImage.height || 1024));
             const offscreen = document.createElement('canvas');
-            offscreen.width = baseImage.width;
-            offscreen.height = baseImage.height;
-            offscreen.getContext('2d').drawImage(baseImage, 0, 0);
-            const base64Data = offscreen.toDataURL('image/png').split(',')[1];
+            offscreen.width = Math.max(1, Math.round(baseImage.width * scale));
+            offscreen.height = Math.max(1, Math.round(baseImage.height * scale));
+            const oCtx = offscreen.getContext('2d');
+            oCtx.drawImage(baseImage, 0, 0, offscreen.width, offscreen.height);
+
+            const parts = [{ text: promptText }];
+            parts.push({
+                inlineData: {
+                    mimeType: "image/jpeg",
+                    data: offscreen.toDataURL('image/jpeg', 0.92).split(',')[1]
+                }
+            });
+
+            if (hasMaskStrokes) {
+                const maskOut = document.createElement('canvas');
+                maskOut.width = offscreen.width;
+                maskOut.height = offscreen.height;
+                maskOut.getContext('2d').drawImage(maskCanvas, 0, 0, maskOut.width, maskOut.height);
+                parts.push({
+                    text: "The second image is a magenta brush mask indicating the target region to edit:"
+                });
+                parts.push({
+                    inlineData: {
+                        mimeType: "image/png",
+                        data: maskOut.toDataURL('image/png').split(',')[1]
+                    }
+                });
+            }
 
             const payload = {
-                contents: [{
-                    role: "user",
-                    parts: [
-                        { text: `Edit this image naturally according to this instruction while maintaining high photographic quality: ${promptText}` },
-                        {
-                            inlineData: {
-                                mimeType: "image/png",
-                                data: base64Data
-                            }
-                        }
-                    ]
-                }],
-                generationConfig: {
-                    responseModalities: ['TEXT', 'IMAGE']
-                }
+                contents: [{ role: "user", parts }],
+                generationConfig: { responseModalities: ['TEXT', 'IMAGE'] }
             };
 
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/${IMAGE_MODEL}:generateContent?key=${apiKey}`;
-            const response = await fetchWithRetry(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            }, 1);
+            let lastError = null;
+            for (const modelName of IMAGE_MODELS) {
+                try {
+                    const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+                    const response = await fetchWithRetry(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    }, 1);
 
-            const result = await response.json();
-            const imgPart = result?.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
-            if (imgPart && imgPart.inlineData) {
-                return `data:${imgPart.inlineData.mimeType};base64,${imgPart.inlineData.data}`;
+                    const result = await response.json();
+                    const candidate = result?.candidates?.[0];
+                    const blockReason = result?.promptFeedback?.blockReason || candidate?.finishReason;
+
+                    if (blockReason === 'SAFETY' || blockReason === 'PROHIBITED_CONTENT' || blockReason === 'IMAGE_SAFETY') {
+                        throw new Error(`SAFETY 차단 (${blockReason})`);
+                    }
+
+                    const respParts = candidate?.content?.parts || [];
+                    const imgPart = respParts.find(p => p.inlineData || p.inline_data);
+                    const inlineObj = imgPart?.inlineData || imgPart?.inline_data;
+
+                    if (inlineObj && inlineObj.data) {
+                        const mime = inlineObj.mimeType || inlineObj.mime_type || "image/png";
+                        return `data:${mime};base64,${inlineObj.data}`;
+                    }
+
+                    const textOnly = respParts.map(p => p.text).filter(Boolean).join(" ").trim();
+                    lastError = new Error(textOnly ? `이미지가 반환되지 않았습니다: ${textOnly}` : `${modelName} 응답에 이미지 데이터가 없습니다.`);
+                } catch (err) {
+                    lastError = err;
+                    if (/SAFETY|PROHIBITED_CONTENT|IMAGE_SAFETY/i.test(String(err?.message || ""))) {
+                        throw err;
+                    }
+                }
             }
-            return null;
+
+            throw lastError || new Error("이미지 편집 모델에서 유효한 이미지를 받지 못했습니다.");
         }
 
-        /**
-         * 새 베이스 이미지 생성 모달 및 실행
-         */
         function openGenerateModal() {
             document.getElementById('generateModal').classList.remove('hidden');
             document.getElementById('generatePromptInput').focus();
@@ -1698,44 +2114,45 @@
 
             try {
                 const payload = {
-                    contents: [{
-                        role: 'user',
-                        parts: [{ text: prompt }]
-                    }],
+                    contents: [{ role: 'user', parts: [{ text: prompt }] }],
                     generationConfig: {
                         responseModalities: ['IMAGE'],
                         imageConfig: { aspectRatio: "16:9" }
                     }
                 };
 
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/${IMAGE_MODEL}:generateContent?key=${apiKey}`;
-                const response = await fetchWithRetry(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                const result = await response.json();
-                const imgPart = result?.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
-
-                if (imgPart && imgPart.inlineData) {
-                    const imageUrl = `data:${imgPart.inlineData.mimeType};base64,${imgPart.inlineData.data}`;
-                    setNewBaseImage(imageUrl, `AI 이미지 생성: ${prompt.slice(0, 18)}...`);
-                    showToast("새로운 AI 이미지가 생성되었습니다!", "success");
-                } else {
-                    throw new Error("No image data returned");
+                let generatedUrl = null;
+                for (const modelName of IMAGE_MODELS) {
+                    const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+                    const response = await fetchWithRetry(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    }, 1);
+                    const result = await response.json();
+                    const parts = result?.candidates?.[0]?.content?.parts || [];
+                    const imgPart = parts.find(p => p.inlineData || p.inline_data);
+                    const inlineObj = imgPart?.inlineData || imgPart?.inline_data;
+                    if (inlineObj && inlineObj.data) {
+                        const mime = inlineObj.mimeType || inlineObj.mime_type || "image/png";
+                        generatedUrl = `data:${mime};base64,${inlineObj.data}`;
+                        break;
+                    }
                 }
+
+                if (!generatedUrl) throw new Error("No image data returned");
+                setNewBaseImage(generatedUrl, `AI 이미지 생성: ${prompt.slice(0, 18)}...`);
+                showToast("새로운 AI 이미지가 생성되었습니다!", "success");
             } catch (err) {
                 console.error(err);
-                showToast("이미지 생성에 실패했습니다. 다른 설명으로 시도해보세요.", "error");
+                showToast("이미지 생성에 실패했습니다. API 키 또는 다른 설명을 확인해주세요.", "error");
             } finally {
                 setLoading(false);
             }
         }
 
-        // Exponential Backoff Fetch Helper
-        async function fetchWithRetry(url, options, maxRetries = 4) {
-            let delay = 1000;
+        async function fetchWithRetry(url, options, maxRetries = 2) {
+            let delay = 800;
             for (let attempt = 0; attempt <= maxRetries; attempt++) {
                 try {
                     const res = await fetch(url, options);
@@ -1852,7 +2269,6 @@
             document.getElementById('val-vignette').textContent = `${f.vignette}%`;
         }
 
-        // 다중 자막/스티커 레이어 관리 함수들
         function addNewTextLayer(defaultText = "새 자막") {
             const newId = 'layer_' + Date.now();
             currentState.layers.push({
@@ -1989,7 +2405,6 @@
             syncTransformUI();
             syncLayersListUI();
 
-            // AI 효과 레이어 카드 렌더링
             const layerContainer = document.getElementById('aiEffectLayers');
             const badge = document.getElementById('aiSummaryBadge');
             if (currentState.aiLayers.length === 0) {
@@ -2016,12 +2431,10 @@
             }
         }
 
-        // 히스토리 스냅샷 저장
         function commitHistory(label) {
             const snapshot = JSON.parse(JSON.stringify(currentState));
             const timeStr = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
-            // 현재 인덱스 이후의 미래 기록 삭제
             if (historyIndex < historyStack.length - 1) {
                 historyStack = historyStack.slice(0, historyIndex + 1);
             }
@@ -2050,20 +2463,17 @@
             const entry = historyStack[idx];
             currentState = JSON.parse(JSON.stringify(entry.state));
 
-            if (baseImage.src !== currentState.imageSrc) {
-                baseImage = new Image();
-                baseImage.onload = () => {
-                    canvas.width = baseImage.width;
-                    canvas.height = baseImage.height;
-                    syncUIWithState();
-                    renderCanvas();
-                };
-                baseImage.src = currentState.imageSrc;
-            } else {
+            const nextImg = new Image();
+            nextImg.onload = () => {
+                baseImage = nextImg;
+                maskCanvas.width = Math.max(1, nextImg.width);
+                maskCanvas.height = Math.max(1, nextImg.height);
+                clearBrushMask(false);
                 syncUIWithState();
                 renderCanvas();
-            }
-            updateHistoryUI();
+                updateHistoryUI();
+            };
+            nextImg.src = currentState.imageSrc;
         }
 
         function updateHistoryUI() {
@@ -2075,7 +2485,7 @@
             listEl.innerHTML = historyStack.map((item, idx) => {
                 const isCurrent = idx === historyIndex;
                 return `
-                    <div onclick="restoreFromHistory(${idx})" 
+                    <div onclick="restoreFromHistory(${idx})"
                         class="p-2.5 rounded-xl border cursor-pointer transition flex items-center justify-between ${isCurrent ? 'bg-blue-600/15 border-blue-500/50 text-white' : 'bg-editor-bg border-editor-border text-gray-400 hover:bg-editor-card'}">
                         <div class="flex items-center gap-2 overflow-hidden">
                             <span class="w-5 h-5 rounded-full text-[10px] font-bold flex items-center justify-center shrink-0 ${isCurrent ? 'bg-blue-600 text-white' : 'bg-editor-card text-gray-500'}">${idx + 1}</span>
@@ -2087,7 +2497,6 @@
             }).reverse().join('');
         }
 
-        // 원본 비교 (누르고 있는 동안 원본 표시)
         function startCompare() {
             isComparingOriginal = true;
             document.getElementById('compareBadge').classList.remove('hidden');
@@ -2118,7 +2527,6 @@
             }
         }
 
-        // 이미지 내보내기 (PNG / JPG)
         function exportImage(format = 'png') {
             isComparingOriginal = false;
             renderCanvas();
@@ -2136,7 +2544,6 @@
             showToast(`${format.toUpperCase()} 파일로 저장되었습니다.`, "success");
         }
 
-        // 우측 탭 전환
         function switchTab(tabName) {
             ['effects', 'layers', 'history'].forEach(t => {
                 const btn = document.getElementById(`tabBtn-${t}`);
@@ -2151,7 +2558,6 @@
             });
         }
 
-        // 로딩 인디케이터 제어
         function setLoading(isLoading, title = "", desc = "") {
             const overlay = document.getElementById('aiLoadingOverlay');
             const btn = document.getElementById('btnExecute');
@@ -2168,11 +2574,10 @@
             }
         }
 
-        // 커스텀 토스트 알림
         function showToast(message, type = "info") {
             const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
-            
+
             let icon = "fa-circle-info text-blue-400";
             let border = "border-blue-500/40";
             if (type === "success") { icon = "fa-circle-check text-emerald-400"; border = "border-emerald-500/40"; }
@@ -2181,7 +2586,7 @@
 
             toast.className = `bg-editor-card/95 backdrop-blur-md border ${border} text-gray-100 px-4 py-3 rounded-xl shadow-2xl text-xs font-medium flex items-center gap-2.5 transform transition-all duration-300 translate-y-2 opacity-0 pointer-events-auto`;
             toast.innerHTML = `<i class="fa-solid ${icon} text-sm"></i><span>${escapeHtml(message)}</span>`;
-            
+
             container.appendChild(toast);
             requestAnimationFrame(() => {
                 toast.classList.remove('translate-y-2', 'opacity-0');
@@ -2206,7 +2611,6 @@
                 .replace(/'/g, "&#039;");
         }
 
-        // 키보드 단축키 (Ctrl+Z / Ctrl+Y)
         document.addEventListener('keydown', (e) => {
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
             if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {

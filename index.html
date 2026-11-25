@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="ko" class="dark">
 <head>
@@ -106,7 +105,7 @@
 <body class="min-h-screen flex flex-col font-sans antialiased selection:bg-blue-500 selection:text-white">
 
     <!-- Top Navigation Bar -->
-    <header class="h-14 bg-studio-panel border-b border-studio-border px-4 flex items-center justify-between sticky top-0 z-30">
+    <header class="min-h-14 bg-studio-panel border-b border-studio-border px-4 py-2 flex flex-wrap items-center justify-between gap-2 sticky top-0 z-30">
         <div class="flex items-center gap-3">
             <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-blue-500/20">
                 <i data-lucide="sparkles" class="w-5 h-5 text-white"></i>
@@ -119,7 +118,20 @@
             </div>
         </div>
 
-        <div class="flex items-center gap-2 sm:gap-3">
+        <!-- API Key Input -->
+        <div class="flex items-center gap-2 flex-1 max-w-xs sm:max-w-sm order-3 sm:order-2 w-full sm:w-auto">
+            <div class="relative w-full">
+                <input id="api-key-input" type="password" placeholder="Gemini API 키 입력 (AIza...)"
+                    class="w-full bg-studio-bg border border-studio-border rounded-lg pl-3 pr-8 py-1.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                    onchange="saveApiKey(this.value)">
+                <button type="button" onclick="toggleApiKeyVisibility()" title="API 키 보기/숨기기"
+                    class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white">
+                    <i id="api-eye-icon" data-lucide="eye" class="w-3.5 h-3.5"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2 sm:gap-3 order-2 sm:order-3">
             <label for="file-upload" class="cursor-pointer bg-studio-card hover:bg-gray-800 text-gray-200 border border-studio-border px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium flex items-center gap-2 transition">
                 <i data-lucide="upload" class="w-4 h-4 text-blue-400"></i>
                 <span class="hidden sm:inline">사진 업로드</span>
@@ -291,7 +303,7 @@
                     <div class="space-y-2">
                         <h3 class="text-lg font-bold text-white">편집할 인물 사진을 불러오세요</h3>
                         <p class="text-xs sm:text-sm text-gray-400 leading-relaxed">
-                            앉아있는 사람을 일어서게 하거나, 더워 보이는 가디건·자켓을 벗기고 시원한 여름 의상으로 자연스럽게 변환할 수 있습니다.
+                            상단에 Gemini API 키를 입력한 뒤 사진을 업로드하거나 샘플을 생성해 보세요. 앉아있는 사람을 일어서게 하거나, 가디건·자켓을 벗기고 시원한 여름 의상으로 변환할 수 있습니다.
                         </p>
                     </div>
 
@@ -321,7 +333,6 @@
                                 <i data-lucide="move-horizontal" class="w-4 h-4"></i>
                             </div>
                         </div>
-                        <!-- Labels -->
                         <span class="absolute top-3 left-3 bg-black/65 backdrop-blur-md text-white text-[11px] font-medium px-2.5 py-1 rounded-md border border-white/10 z-10">원본 이미지</span>
                         <span id="edited-badge-split" class="hidden absolute top-3 right-3 bg-blue-600/85 backdrop-blur-md text-white text-[11px] font-medium px-2.5 py-1 rounded-md border border-white/10 z-10">AI 편집 완료</span>
                     </div>
@@ -358,7 +369,7 @@
 
             </div>
 
-            <!-- Toast Notification Box (Replaces alert) -->
+            <!-- Toast Notification Box -->
             <div id="toast-box" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-studio-card border border-studio-border text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 text-xs sm:text-sm max-w-md">
                 <i id="toast-icon" data-lucide="info" class="w-4 h-4 text-blue-400 shrink-0"></i>
                 <span id="toast-message">알림 메시지</span>
@@ -385,10 +396,8 @@
     </div>
 
     <script>
-        // Initialize Lucide icons
         lucide.createIcons();
 
-        // Application State
         const state = {
             originalBase64: null,
             originalMimeType: 'image/png',
@@ -397,10 +406,40 @@
             selectedPose: 'keep',
             selectedOutfit: 'keep',
             viewMode: 'split',
-            history: []
+            history: [],
+            apiKey: localStorage.getItem('gemini_api_key') || ''
         };
 
-        const apiKey = ""; // Runtime environment provides key automatically
+        document.getElementById('api-key-input').value = state.apiKey;
+
+        function saveApiKey(val) {
+            state.apiKey = val.trim();
+            localStorage.setItem('gemini_api_key', state.apiKey);
+        }
+
+        function toggleApiKeyVisibility() {
+            const input = document.getElementById('api-key-input');
+            const icon = document.getElementById('api-eye-icon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.setAttribute('data-lucide', 'eye-off');
+            } else {
+                input.type = 'password';
+                icon.setAttribute('data-lucide', 'eye');
+            }
+            lucide.createIcons();
+        }
+
+        function getActiveApiKey() {
+            const key = (document.getElementById('api-key-input').value || state.apiKey || '').trim();
+            if (!key) {
+                showToast('상단에 Gemini API 키를 먼저 입력해 주세요.', 'error');
+                return null;
+            }
+            state.apiKey = key;
+            localStorage.setItem('gemini_api_key', key);
+            return key;
+        }
 
         // UI Selection Handlers
         document.querySelectorAll('.pose-btn').forEach(btn => {
@@ -418,7 +457,6 @@
         document.querySelectorAll('.outfit-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 selectOutfitButton(btn.dataset.outfit);
-                // Sync slider roughly
                 const map = { 'keep': 0, 'remove_outerwear': 1, 'summer_casual': 2, 'sleeveless': 2, 'beachwear': 3, 'formal_suit': 0 };
                 document.getElementById('outfit-level').value = map[btn.dataset.outfit] ?? 0;
             });
@@ -463,7 +501,6 @@
             if (keepBtn) keepBtn.click();
         }
 
-        // Toast Helper
         let toastTimeout;
         function showToast(msg, type = 'info') {
             const box = document.getElementById('toast-box');
@@ -487,10 +524,9 @@
             clearTimeout(toastTimeout);
             toastTimeout = setTimeout(() => {
                 box.classList.add('hidden');
-            }, 4000);
+            }, 4500);
         }
 
-        // Image Upload Handling
         function handleImageUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -527,11 +563,8 @@
             document.getElementById('download-btn').disabled = true;
 
             updateCanvasImages(dataUrl, dataUrl);
-            
-            // Reset slider to center
             setSliderPosition(50);
 
-            // Add initial entry to history if empty
             if (state.history.length === 0) {
                 addHistoryItem(base64, mimeType, label);
             }
@@ -545,7 +578,6 @@
             document.getElementById('img-edited-only').src = editedUrl;
         }
 
-        // View Mode Switcher
         function setViewMode(mode) {
             state.viewMode = mode;
             const modes = ['split', 'side', 'result'];
@@ -564,7 +596,6 @@
             });
         }
 
-        // Before/After Interactive Slider
         const comparisonContainer = document.getElementById('mode-split');
         const comparisonOverlay = document.getElementById('comparison-overlay');
         const sliderHandle = document.getElementById('slider-handle');
@@ -595,15 +626,13 @@
             if (e.touches.length > 0) handleMove(e.touches[0].clientX);
         }, { passive: true });
 
-        // Click anywhere on split container to jump slider
         comparisonContainer.addEventListener('click', (e) => {
             const rect = comparisonContainer.getBoundingClientRect();
             const percentage = ((e.clientX - rect.left) / rect.width) * 100;
             setSliderPosition(percentage);
         });
 
-        // Exponential Backoff Fetch Helper
-        async function fetchWithRetry(url, options, maxRetries = 4) {
+        async function fetchWithRetry(url, options, maxRetries = 3) {
             let delay = 1000;
             for (let i = 0; i < maxRetries; i++) {
                 try {
@@ -614,15 +643,17 @@
                     }
                     return await response.json();
                 } catch (err) {
-                    if (i === maxRetries - 1) throw err;
+                    if (i === maxRetries - 1 || err.message.includes('HTTP 403')) throw err;
                     await new Promise(res => setTimeout(res, delay));
                     delay *= 2;
                 }
             }
         }
 
-        // Generate a Sample Portrait using Gemini Image Generation
         async function generateSamplePortrait() {
+            const key = getActiveApiKey();
+            if (!key) return;
+
             setLoading(true, '테스트용 샘플 인물 사진을 생성하고 있습니다...', '공원 벤치에 가디건을 입고 앉아있는 자연스러운 인물 사진 생성 중');
             try {
                 const prompt = "A realistic, high-quality full-body photograph of a young Korean woman in her 20s sitting comfortably on a wooden bench in a sunlit green park, wearing a cozy blue knit cardigan over a plain white t-shirt, black trousers, and sneakers, smiling warmly at the camera, natural daylight, sharp focus.";
@@ -637,7 +668,7 @@
                     }
                 };
 
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${apiKey}`;
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${encodeURIComponent(key)}`;
                 const result = await fetchWithRetry(apiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -652,18 +683,16 @@
                 showToast('샘플 인물 사진이 준비되었습니다! 왼쪽 메뉴에서 포즈나 의상을 바꿔보세요.', 'success');
             } catch (error) {
                 console.error(error);
-                showToast('샘플 생성 중 오류가 발생했습니다. 직접 사진을 업로드해 주세요.', 'error');
+                showToast(`샘플 생성 오류: ${error.message}`, 'error');
             } finally {
                 setLoading(false);
             }
         }
 
-        // Build Prompt from Controls
         function buildEditInstruction() {
             const instructions = [];
             const summaryTags = [];
 
-            // 1. Pose mapping
             const poseMap = {
                 'keep': null,
                 'stand': 'Change the person\'s pose so they are standing upright naturally on their feet, full body visible in a relaxed standing posture.',
@@ -681,7 +710,6 @@
                 summaryTags.push(poseLabels[state.selectedPose]);
             }
 
-            // 2. Outfit mapping
             const outfitMap = {
                 'keep': null,
                 'remove_outerwear': 'Remove the outer layer (such as the cardigan, jacket, coat, or hoodie) so the person is only wearing the lighter inner shirt/top underneath. Keep the rest of the outfit consistent.',
@@ -699,7 +727,6 @@
                 summaryTags.push(outfitLabels[state.selectedOutfit]);
             }
 
-            // 3. Expression
             const expr = document.getElementById('expression-select').value;
             const exprMap = {
                 'keep': null,
@@ -712,7 +739,6 @@
                 summaryTags.push('표정 보정');
             }
 
-            // 4. Background
             const bg = document.getElementById('bg-select').value;
             const bgMap = {
                 'keep': 'Keep the background environment, lighting, and setting consistent with the original image, seamlessly filling in any area revealed by the pose or outfit change.',
@@ -726,7 +752,6 @@
                 if (bg !== 'keep') summaryTags.push('배경 변경');
             }
 
-            // 5. Custom prompt
             const customText = document.getElementById('custom-prompt').value.trim();
             if (customText) {
                 instructions.push(`Additional user request: ${customText}`);
@@ -745,8 +770,10 @@
             };
         }
 
-        // Main AI Image-to-Image Edit Call
         async function runAIEdit() {
+            const key = getActiveApiKey();
+            if (!key) return;
+
             if (!state.originalBase64) {
                 showToast('먼저 편집할 인물 사진을 업로드하거나 샘플을 생성해 주세요.', 'error');
                 return;
@@ -779,7 +806,7 @@
                     }
                 };
 
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${apiKey}`;
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${encodeURIComponent(key)}`;
                 const result = await fetchWithRetry(apiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -809,7 +836,6 @@
                 document.getElementById('chain-edit-btn').classList.remove('hidden');
                 document.getElementById('download-btn').disabled = false;
 
-                // Animate slider reveal
                 setSliderPosition(35);
 
                 addHistoryItem(newBase64, newMime, editSpec.label);
@@ -823,7 +849,6 @@
             }
         }
 
-        // Chain Editing: Set current result as the new base image
         function useResultAsSource() {
             if (!state.currentEditedBase64) return;
             state.originalBase64 = state.currentEditedBase64;
@@ -835,7 +860,6 @@
             showToast('현재 결과물이 새로운 기준 원본으로 설정되었습니다. 추가 편집을 진행하세요!', 'info');
         }
 
-        // History Panel Management
         function addHistoryItem(base64, mimeType, label) {
             const timestamp = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
             const item = { id: Date.now(), base64, mimeType, label, timestamp };
@@ -874,7 +898,6 @@
             showToast(`'${item.label}' 버전을 불러왔습니다.`, 'info');
         }
 
-        // Download Result Image
         function downloadResult() {
             if (!state.currentEditedBase64) return;
             const link = document.createElement('a');
@@ -904,4 +927,3 @@
     </script>
 </body>
 </html>
-```
